@@ -2,3 +2,5 @@
 
 assets/styles/css
 .sass-cache/
+
+node_modules/
