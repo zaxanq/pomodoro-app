@@ -17,16 +17,20 @@
             <div class="settings-container">
                 <div class="settings__task">
                     <label for="minutes-slider" class="slider-label">Task</label>
-                    <input type="range" id="task" name="task-slider" class="slider"
+                    <input type="range" id="task-slider" name="task-slider" class="slider"
                            min="0" max="60" value="25" step="1">
+                    <p class="slider-label task-slider-value"></p>
                 </div>
                 <div class="settings__break">
                     <label for="minutes-slider" class="slider-label">Break</label>
-                    <input type="range" id="minutes" name="break-slider" class="slider"
+                    <input type="range" id="break-slider" name="break-slider" class="slider"
                            min="0" max="60" value="5" step="1">
+                    <p class="slider-label break-slider-value"></p>
                 </div>
             </div>
         </div>
     </div>
+
+    <script src="js/slider.js"></script>
 </body>
 </html>
