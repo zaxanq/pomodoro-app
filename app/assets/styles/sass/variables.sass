@@ -9,3 +9,31 @@ $app-height: $app-width
 $wrapper-width: 52rem
 $wrapper-height: $wrapper-width
 $wrapper-background: rgba(255,255,255,0.82)
+
+// slider elements
+$slider-thumb-color: $body-background
+$slider-track-color: rgba(0,0,0,0.24)
+
+// mixins etc
+%flex-center-center
+  display: flex
+  justify-content: center
+  align-items: center
+
+%absolute-center
+  position: absolute
+  left: 50%
+  top: 50%
+  transform: translate(-50%, -50%)
+
+=size($width, $height)
+  width: $width
+  height: $height
+
+=min-size($width, $height)
+  min-width: $width
+  min-height: $height
+
+=max-size($width, $height)
+  max-width: $width
+  max-height: $height
