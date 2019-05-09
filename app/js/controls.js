@@ -33,14 +33,3 @@ class Controls {
         });
     }
 }
-
-
-function begin() {
-    let controls = new Controls;
-
-    window.addEventListener('DOMContentLoaded', () => {
-        controls.init();
-    });
-}
-
-begin();

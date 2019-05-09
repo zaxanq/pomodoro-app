@@ -13,6 +13,8 @@ class Settings {
         this.sessionValueContainer = document.getElementsByClassName('session-value')[0];
         this.breakValueContainer = document.getElementsByClassName('break-value')[0];
 
+        this.displayedTime = document.getElementsByClassName('current-time')[0];
+
         this.renderValues('initial');
 
         this.addOnClick(this.session);
@@ -34,6 +36,7 @@ class Settings {
 
     updateValue(type, changeValue) {
         let value;
+        let displayedValue;
 
         if (type === 'session') {
             value = this.sessionValue;
@@ -51,6 +54,13 @@ class Settings {
         } else {
             value += changeValue;
         }
+
+        if (value < 10) {
+            displayedValue = '0' + value;
+        } else {
+            displayedValue = value;
+        }
+        this.displayedTime.innerText = displayedValue + ':00';
 
         return value;
     }
@@ -80,13 +90,3 @@ class Settings {
         //TODO: add method changing value into input on click
     }
 }
-
-function begin() {
-    let settings = new Settings;
-
-    window.addEventListener('DOMContentLoaded', () => {
-        settings.init();
-    });
-}
-
-begin();
