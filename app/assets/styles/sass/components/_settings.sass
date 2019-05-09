@@ -1,10 +1,13 @@
 .settings-container
   @extend %flex-center-center
 
-.settings__task,
+.settings__session,
 .settings__break
+  flex: 1
+  display: flex
+  justify-content: center
+
+.settings__buttons--left,
+.settings__buttons-right
   display: flex
   flex-direction: column
-
-.settings__task
-  margin-right: 2rem

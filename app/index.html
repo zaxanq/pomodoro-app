@@ -15,17 +15,31 @@
             <div class="timer-container"></div>
             <div class="controls-container"></div>
             <div class="settings-container">
-                <div class="settings__task">
-                    <label for="minutes-slider" class="slider-label">Task</label>
-                    <input type="range" id="task-slider" name="task-slider" class="slider"
-                           min="0" max="60" value="25" step="1">
-                    <p class="slider-label task-slider-value"></p>
+                <div class="settings__session">
+                    <div class="settings__buttons--left">
+                        <button class="button increase-1 button-value-change">+1</button>
+                        <button class="button increase-10 button-value-change">+10</button>
+                    </div>
+                    <div class="settings__value">
+                        <span class="session-value"></span>
+                    </div>
+                    <div class="settings__buttons-right">
+                        <button class="button decrease-1 button-value-change">-1</button>
+                        <button class="button decrease-10 button-value-change">-10</button>
+                    </div>
                 </div>
                 <div class="settings__break">
-                    <label for="minutes-slider" class="slider-label">Break</label>
-                    <input type="range" id="break-slider" name="break-slider" class="slider"
-                           min="0" max="60" value="5" step="1">
-                    <p class="slider-label break-slider-value"></p>
+                    <div class="settings__buttons--left">
+                        <button class="button increase-1 button-value-change">+1</button>
+                        <button class="button increase-10 button-value-change">+10</button>
+                    </div>
+                    <div class="settings__value">
+                        <span class="break-value"></span>
+                    </div>
+                    <div class="settings__buttons-right">
+                        <button class="button decrease-1 button-value-change">-1</button>
+                        <button class="button decrease-10 button-value-change">-10</button>
+                    </div>
                 </div>
             </div>
         </div>
