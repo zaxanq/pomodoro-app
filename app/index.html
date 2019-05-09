@@ -12,8 +12,14 @@
 <body>
     <div class="root">
         <div class="wrapper">
-            <div class="timer-container"></div>
-            <div class="controls-container"></div>
+            <div class="timer-container">
+                <div class="clock"></div>
+            </div>
+            <div class="controls-container">
+                <button class="button button-with-text controls-start">Start</button>
+                <button class="button button-with-text controls-pause">Pause</button>
+                <button class="button button-with-text controls-reset">Reset</button>
+            </div>
             <div class="settings-container">
                 <div class="settings__session">
                     <div class="settings__label">
@@ -56,6 +62,7 @@
         </div>
     </div>
 
-    <script src="js/slider.js"></script>
+    <script src="js/controls.js"></script>
+    <script src="js/settings.js"></script>
 </body>
 </html>

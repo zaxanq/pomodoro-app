@@ -1,0 +1,17 @@
+.controls-container
+  display: flex
+  justify-content: center
+  align-items: center
+
+  .button
+    margin: 0 1rem
+
+.controls-pause
+  &.paused
+    @extend .button:active
+
+    &:hover
+      @extend .button:active
+
+    &::before
+      content: none

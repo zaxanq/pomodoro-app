@@ -1,5 +1,4 @@
-
-class Slider {
+class Settings {
     init() {
         this.initialSessionValue = 25;
         this.initialBreakValue = 5;
@@ -18,7 +17,6 @@ class Slider {
 
         this.addOnClick(this.session);
         this.addOnClick(this.break);
-
     }
 
     renderValues(valueType) {
@@ -36,6 +34,7 @@ class Slider {
 
     updateValue(type, changeValue) {
         let value;
+
         if (type === 'session') {
             value = this.sessionValue;
         } else if (type === 'break') {
@@ -83,10 +82,10 @@ class Slider {
 }
 
 function begin() {
-    let slider = new Slider;
+    let settings = new Settings;
 
     window.addEventListener('DOMContentLoaded', () => {
-        slider.init();
+        settings.init();
     });
 }
 
