@@ -2,13 +2,40 @@
   @extend %flex-center-center
   position: relative
 
-.clock
+.clock-container
   @extend %flex-center-center
   position: relative
   width: $clock-size
   height: $clock-size
-  border-radius: 50%
-  border: 0.6rem solid rgba($color-secondary-400, 0.8)
+
+.circle
+  position: absolute
+  display: flex
+  width: 100%
+  height: 100%
+
+  .circle--left,
+  .circle--right
+    width: 50%
+    height: 100%
+    border: 0.6rem solid $color-secondary-400
+
+  .circle--left
+    border-radius: $clock-size 0 0 $clock-size
+    border-right: none
+    transform-origin: right center
+
+    &.under-50
+      width: 51%
+      border-width: 1rem
+      border-color: $wrapper-background
+
+
+  .circle--right
+    border-radius: 0 $clock-size $clock-size 0
+    border-left: none
+    transform-origin: left center
+
 
 .current-time
   font-size: 5.6rem

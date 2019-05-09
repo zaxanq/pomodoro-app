@@ -17,10 +17,8 @@ class App {
     }
 
     initSettings() {
-        this.initialSessionValue = 25;
-        this.initialBreakValue = 5;
-        this.sessionValue = this.initialSessionValue;
-        this.breakValue = this.initialBreakValue;
+        this.sessionValue = 25;
+        this.breakValue = 5;
         this.trueSessionTime = this.sessionValue * 60;
         this.trueBreakTime = this.breakValue * 60;
 
@@ -42,7 +40,8 @@ class App {
     }
 
     initTimer() {
-        this.clock = document.getElementsByClassName('clock')[0];
+        this.circleLeft = document.getElementsByClassName('circle--left')[0];
+        this.circleRight = document.getElementsByClassName('circle--right')[0];
 
         this.minutes = Math.floor(this.trueSessionTime / 60);
         this.seconds = this.trueSessionTime % 60;
@@ -85,28 +84,16 @@ class App {
 
             if (elementClass === 'controls-start') {
                 if (this.state !== 1) {
-                    this.showActionIcon('start');
-                    this.buttonStart.classList.add('active');
-                    this.buttonStart.innerText = 'Started';
-                    this.disableButton('start');
-                    this.state = 1;
                     this.start();
                 }
 
             } else if (elementClass === 'controls-pause') {
                 if (this.state === 1) {
                     this.showActionIcon('pause');
-                    this.buttonPause.classList.add('active');
-                    this.buttonPause.innerText = 'Paused';
-                    this.disableButton('pause');
-                    this.state = 2;
                     this.pause();
                 } else if (this.state === 0) {
                     this.alert('You cannot pause a timer that is not started.');
                     console.log('ERROR: Cannot pause a timer that is not started.');
-                } else {
-                    this.buttonPause.classList.remove('paused');
-                    this.buttonPause.innerText = 'Pause';
                 }
 
             } else if (elementClass === 'controls-reset') {
@@ -115,11 +102,7 @@ class App {
                     console.log('ERROR: Cannot reset a timer that is not started.');
                 } else {
                     this.showActionIcon('reset');
-                    this.trueSessionTime = this.sessionValue * 60;
-                    this.disableButton('reset');
-                    this.pause();
-                    this.state = 0;
-                    this.renderClock();
+                    this.stop();
                 }
             } else {
                 console.log('ERROR: Unknown controls.');
@@ -140,18 +123,51 @@ class App {
         } else if (valueType === 'break') {
             this.breakValueContainer.innerText = this.breakValue;
         } else if (valueType === 'initial') {
-            this.sessionValueContainer.innerText = this.initialSessionValue;
-            this.breakValueContainer.innerText = this.initialBreakValue;
+            this.sessionValueContainer.innerText = this.sessionValue;
+            this.breakValueContainer.innerText = this.breakValue;
         } else {
             console.log('ERROR: Undefined value container.');
         }
     }
 
     start() {
+        this.initialSessionTime = this.sessionValue * 60;
+        this.initialBreakValue = this.breakValue * 5;
+
+        this.showActionIcon('start');
+        this.buttonStart.classList.add('active');
+        this.buttonStart.innerText = 'Started';
+        this.disableButton('start');
+        this.state = 1;
+
         this.timerInterval = setInterval(() => {
             this.trueSessionTime--;
-            this.renderClock();
+
+            if (this.trueSessionTime < 0) {
+                this.pause();
+            } else {
+                this.renderClock();
+            }
         }, 1000);
+    }
+
+    pause() {
+        this.buttonPause.classList.add('active');
+        this.buttonPause.innerText = 'Paused';
+        this.disableButton('pause');
+        this.state = 2;
+
+        clearInterval(this.timerInterval);
+    }
+
+    stop() {
+        this.trueSessionTime = this.sessionValue * 60;
+        this.disableButton('reset');
+        this.state = 0;
+
+        clearInterval(this.timerInterval);
+
+        this.renderClock();
     }
 
     renderClock() {
@@ -163,10 +179,21 @@ class App {
         }
 
         this.displayedTime.innerText = this.minutes + ':' + this.seconds;
+        this.renderCircle();
     }
 
-    pause() {
-        clearInterval(this.timerInterval);
+    renderCircle() {
+        let progress = (this.initialSessionTime - this.trueSessionTime) / this.initialSessionTime * 360;
+
+        console.log(progress);
+        if (progress === 360) {
+            this.circleLeft.setAttribute('style', `transform: rotate(-180deg)`);
+        } else {
+            this.circleLeft.setAttribute('style', `transform: rotate(-${progress % -180}deg)`);
+            if (progress >= 180) {
+                this.circleLeft.classList.add('under-50');
+            }
+        }
     }
 
     alert(message) {
@@ -215,6 +242,7 @@ class App {
             this.trueSessionTime += changeValue;
         }
 
+        this.initialSessionTime = this.trueSessionTime;
         this.sessionValue = Math.floor(this.trueSessionTime / 60);
         this.renderClock();
     }
