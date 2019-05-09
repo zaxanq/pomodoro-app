@@ -1,4 +1,5 @@
-.settings-container
+.settings-container,
+.settings__buttons
   @extend %flex-center-center
 
 .settings__session,
@@ -6,8 +7,26 @@
   flex: 1
   display: flex
   justify-content: center
+  flex-direction: column
 
 .settings__buttons--left,
 .settings__buttons-right
   display: flex
   flex-direction: column
+
+.settings__value
+  display: flex
+  justify-content: flex-end
+  align-items: center
+  padding: 0 2rem
+  width: 8.6rem
+  color: $button-text-color
+  font-size: 4rem
+
+.settings__label
+  text-align: center
+  margin-bottom: 1rem
+
+.label
+  color: $color-secondary-400
+  font-size: 2rem
