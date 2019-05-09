@@ -21,9 +21,8 @@ class App {
         this.initialBreakValue = 5;
         this.sessionValue = this.initialSessionValue;
         this.breakValue = this.initialBreakValue;
-
-        //TODO: Continue with implementing seconds in the timer
-        this.time = [this.sessionValue, 0];
+        this.trueSessionTime = this.sessionValue * 60;
+        this.trueBreakTime = this.breakValue * 60;
 
         this.sessionClass = 'settings__session';
         this.session = document.getElementsByClassName(this.sessionClass)[0];
@@ -45,10 +44,14 @@ class App {
     initTimer() {
         this.clock = document.getElementsByClassName('clock')[0];
 
-        this.minutes = this.sessionValue;
-        this.seconds = 0;
+        this.minutes = Math.floor(this.trueSessionTime / 60);
+        this.seconds = this.trueSessionTime % 60;
+
+        if (this.seconds < 10) {
+            this.seconds = '0' + this.seconds;
+        }
         setTimeout(() => {
-            this.displayedTime.innerText = this.minutes + ':0' + this.seconds;
+            this.displayedTime.innerText = this.minutes + ':' + this.seconds;
         }, 0);
     }
 
@@ -60,12 +63,13 @@ class App {
     }
 
     addButtonClick(element, type, changeValue) {
-        document.querySelector(`.${element.classList[0]} .${type}-${Math.abs(changeValue)}`).addEventListener('click', () => {
+        document.querySelector(`.${element.classList[0]} .${type}-${Math.abs(changeValue)}`)
+            .addEventListener('click', () => {
             if (element.classList[0] === this.sessionClass) {
-                this.sessionValue = this.updateValue('session', changeValue);
+                this.updateValue(changeValue);
                 this.renderValues('session')
             } else if (element.classList[0] === this.breakClass) {
-                this.breakValue = this.updateValue('break', changeValue);
+                this.updateValue(changeValue);
                 this.renderValues('break');
             } else {
                 console.log('ERROR: No buttons found to add EventListener.')
@@ -130,25 +134,20 @@ class App {
 
     start() {
         this.timerInterval = setInterval(() => {
-            this.runTime();
+            this.trueSessionTime--;
+            this.renderClock();
         }, 1000);
     }
 
-    runTime() {
-        let minutes = parseInt(this.displayedTime.innerText.split(':')[0]);
-        let seconds = parseInt(this.displayedTime.innerText.split(':')[1]);
+    renderClock() {
+        this.minutes = Math.floor(this.trueSessionTime / 60);
+        this.seconds = this.trueSessionTime % 60;
 
-        if (seconds === 0) {
-            seconds = 59;
-            minutes--;
-        } else {
-            seconds--;
+        if (this.seconds < 10) {
+            this.seconds = '0' + this.seconds;
         }
-        this.renderClock(minutes + ':' + seconds);
-    }
 
-    renderClock(time) {
-        this.displayedTime.innerText = time;
+        this.displayedTime.innerText = this.minutes + ':' + this.seconds;
     }
 
     pause() {
@@ -163,7 +162,7 @@ class App {
 
         setTimeout(() => {
             alert.classList.add('hidden');
-        }, 2000);
+        }, 1500);
     }
 
     disableButton(button) {
@@ -186,36 +185,20 @@ class App {
             console.log('ERROR: Unknown button.');
         }
     }
-    updateValue(type, changeValue) {
-        let value;
-        let displayedValue;
+    updateValue(changeValue) {
+        changeValue *= 60;
 
-        if (type === 'session') {
-            value = this.sessionValue;
-        } else if (type === 'break') {
-            value = this.breakValue;
-        } else {
-            console.log('ERROR: No value specified to update.');
-        }
-
-        if (value < -changeValue) {
-            value = 0;
-        } else if (value + changeValue > 60) {
-            value = 60;
+        if (this.trueSessionTime < -changeValue) {
+            this.trueSessionTime = 0;
+        } else if (this.trueSessionTime + changeValue > 3600) {
+            this.trueSessionTime = 3600;
             //TODO: add info that it's not possible to add more
         } else {
-            value += changeValue;
+            this.trueSessionTime += changeValue;
         }
 
-        if (value < 10) {
-            displayedValue = '0' + value;
-        } else {
-            displayedValue = value;
-        }
-
-        this.displayedTime.innerText = displayedValue + this.seconds;
-
-        return value;
+        this.sessionValue = Math.floor(this.trueSessionTime / 60);
+        this.renderClock();
     }
 
     toInput() {
