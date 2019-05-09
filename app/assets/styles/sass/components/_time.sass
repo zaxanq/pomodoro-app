@@ -1,5 +1,6 @@
 .timer-container
   @extend %flex-center-center
+  position: relative
 
 .clock
   @extend %flex-center-center
@@ -9,5 +10,16 @@
   border: 0.6rem solid rgba($color-secondary-400, 0.8)
 
 .current-time
-  color: $color-secondary-400
   font-size: 5.6rem
+
+.alert-container
+  width: 100%
+  position: absolute
+  text-align: center
+  bottom: 0
+
+  .alert
+
+    &.hidden
+      transition: opacity 0.5s ease-in-out
+      opacity: 0

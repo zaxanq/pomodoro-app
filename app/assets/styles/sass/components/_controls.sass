@@ -6,12 +6,11 @@
   .button
     margin: 0 1rem
 
-.controls-pause
-  &.paused
-    @extend .button:active
-
-    &:hover
+    &.active
       @extend .button:active
 
-    &::before
-      content: none
+      &:hover
+        @extend .button:active
+
+      &::before
+        content: none
