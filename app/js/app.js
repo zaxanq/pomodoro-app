@@ -79,18 +79,23 @@ class App {
 
     addOnClick(element) {
         let elementClass = element.classList[2];
+
         element.addEventListener('click', () => {
             this.clearButtons();
+
             if (elementClass === 'controls-start') {
                 if (this.state !== 1) {
+                    this.showActionIcon('start');
                     this.buttonStart.classList.add('active');
                     this.buttonStart.innerText = 'Started';
                     this.disableButton('start');
                     this.state = 1;
                     this.start();
                 }
+
             } else if (elementClass === 'controls-pause') {
                 if (this.state === 1) {
+                    this.showActionIcon('pause');
                     this.buttonPause.classList.add('active');
                     this.buttonPause.innerText = 'Paused';
                     this.disableButton('pause');
@@ -105,7 +110,17 @@ class App {
                 }
 
             } else if (elementClass === 'controls-reset') {
-
+                if (this.state === 0) {
+                    this.alert('The timer is already in initial state.');
+                    console.log('ERROR: Cannot reset a timer that is not started.');
+                } else {
+                    this.showActionIcon('reset');
+                    this.trueSessionTime = this.sessionValue * 60;
+                    this.disableButton('reset');
+                    this.pause();
+                    this.state = 0;
+                    this.renderClock();
+                }
             } else {
                 console.log('ERROR: Unknown controls.');
             }
@@ -178,6 +193,9 @@ class App {
             this.buttonReset.classList.remove('disabled');
         } else if (button === 'reset') {
             this.buttonReset.classList.add('disabled');
+            setTimeout(() => {
+                this.buttonReset.classList.remove('disabled');
+            },200);
 
             this.buttonStart.classList.remove('disabled');
             this.buttonPause.classList.remove('disabled');
@@ -199,6 +217,14 @@ class App {
 
         this.sessionValue = Math.floor(this.trueSessionTime / 60);
         this.renderClock();
+    }
+
+    showActionIcon(type) {
+        document.getElementsByClassName(`action-${type}`)[0].classList.remove('hidden');
+
+        setTimeout(() => {
+            document.getElementsByClassName(`action-${type}`)[0].classList.add('hidden');
+        }, 400)
     }
 
     toInput() {
