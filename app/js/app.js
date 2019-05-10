@@ -21,6 +21,8 @@ class App {
         this.breakValue = 5;
         this.trueSessionTime = this.sessionValue * 60;
         this.trueBreakTime = this.breakValue * 60;
+        this.initialSessionTime = this.trueSessionTime;
+        this.initialBreakTime = this.trueBreakTime;
 
         this.sessionClass = 'settings__session';
         this.session = document.getElementsByClassName(this.sessionClass)[0];
@@ -31,7 +33,6 @@ class App {
         this.breakValueContainer = document.getElementsByClassName('break-value')[0];
 
         this.displayedTime = document.getElementsByClassName('current-time')[0];
-        console.log(this.displayedTime);
 
         this.renderValues('initial');
 
@@ -66,7 +67,7 @@ class App {
             .addEventListener('click', () => {
             if (element.classList[0] === this.sessionClass) {
                 this.updateValue(changeValue);
-                this.renderValues('session')
+                this.renderValues('session');
             } else if (element.classList[0] === this.breakClass) {
                 this.updateValue(changeValue);
                 this.renderValues('break');
@@ -84,7 +85,12 @@ class App {
 
             if (elementClass === 'controls-start') {
                 if (this.state !== 1) {
-                    this.start();
+                    if (this.trueSessionTime === 0) {
+                        this.alert('You cannot start a timer for 0 minutes.');
+                        console.log('ERROR: Cannot start a timer for 0 minutes.');
+                    } else {
+                        this.start();
+                    }
                 }
 
             } else if (elementClass === 'controls-pause') {
@@ -144,7 +150,7 @@ class App {
             this.trueSessionTime--;
 
             if (this.trueSessionTime < 0) {
-                this.pause();
+                this.finished();
             } else {
                 this.renderClock();
             }
@@ -170,6 +176,13 @@ class App {
         this.renderClock();
     }
 
+    finished() {
+        this.state = 0;
+        this.clearButtons();
+
+        clearInterval(this.timerInterval);
+    }
+
     renderClock() {
         this.minutes = Math.floor(this.trueSessionTime / 60);
         this.seconds = this.trueSessionTime % 60;
@@ -183,16 +196,18 @@ class App {
     }
 
     renderCircle() {
-        let progress = (this.initialSessionTime - this.trueSessionTime) / this.initialSessionTime * 360;
+        let progress = this.initialSessionTime === 0 ? 0 : (this.initialSessionTime - this.trueSessionTime) / this.initialSessionTime * 360;
 
         console.log(progress);
-        if (progress === 360) {
-            this.circleLeft.setAttribute('style', `transform: rotate(-180deg)`);
+        if (progress % 360 === 0) {
+            this.circleLeft.setAttribute('style', `transform: rotate(0deg)`);
+            this.circleRight.setAttribute('style', `transform: rotate(0deg)`);
+        } else if (progress <= 180) {
+            this.circleLeft.setAttribute('style', `transform: rotate(-${progress}deg)`);
+            this.circleRight.setAttribute('style', `transform: rotate(0deg)`);
         } else {
-            this.circleLeft.setAttribute('style', `transform: rotate(-${progress % -180}deg)`);
-            if (progress >= 180) {
-                this.circleLeft.classList.add('under-50');
-            }
+            this.circleLeft.setAttribute('style', `transform: rotate(-180deg)`);
+            this.circleRight.setAttribute('style', `transform: rotate(-${progress % 180}deg)`);
         }
     }
 
@@ -235,15 +250,19 @@ class App {
 
         if (this.trueSessionTime < -changeValue) {
             this.trueSessionTime = 0;
+            this.initialSessionTime = 0;
         } else if (this.trueSessionTime + changeValue > 3600) {
             this.trueSessionTime = 3600;
+            this.initialSessionTime = 3600;
             //TODO: add info that it's not possible to add more
         } else {
             this.trueSessionTime += changeValue;
+            this.initialSessionTime += changeValue;
         }
 
-        this.initialSessionTime = this.trueSessionTime;
-        this.sessionValue = Math.floor(this.trueSessionTime / 60);
+        console.log(this.initialSessionTime, this.trueSessionTime, this.sessionValue);
+
+        this.sessionValue = Math.floor(this.initialSessionTime / 60);
         this.renderClock();
     }
 
