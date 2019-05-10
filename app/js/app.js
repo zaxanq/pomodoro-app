@@ -8,6 +8,22 @@ class App {
         this.initTimer();
     }
 
+    /*
+       current buglist:
+        *   session time change works only when break mode is active (no need for running timer) while
+            break time change works only when session mode is active
+                these 2 need to be solved probably in renderValue() method.
+        *   setting session time to 0 during running timer will stop the timer. but even if we change session time
+            we still cannot start the timer.
+                however pressing break button sets session time to what we changed it. worth checking out.
+        *   if we start the timer (with session time smaller than 60 (!)) and keep current time below 60 minutes
+            we can keep increasing session time for how long we want, even though it should max at 60.
+
+        feature-add list:
+        *   maybe max time should be 120 minutes instead of 60, or maybe as much one desires (max 720?)
+        *   session time number to change into input at click
+     */
+
     initControls() {
         this.state = 0;
         this.sessionIsActive = true;
