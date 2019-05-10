@@ -3,8 +3,8 @@ class App {
         this.root = document.getElementsByClassName('root')[0];
         this.wrapper = document.getElementsByClassName('wrapper')[0];
 
-        this.initControls();
         this.initSettings();
+        this.initControls();
         this.initTimer();
     }
 
@@ -30,10 +30,10 @@ class App {
 
     initSettings() {
         this.sessionValue = 25;
-        this.breakValue = 5;
         this.trueSessionTime = this.sessionValue * 60;
-        this.trueBreakTime = this.breakValue * 60;
         this.initialSessionTime = this.trueSessionTime;
+        this.breakValue = 5;
+        this.trueBreakTime = this.breakValue * 60;
         this.initialBreakTime = this.trueBreakTime;
 
         this.sessionClass = 'settings__session';
@@ -56,8 +56,8 @@ class App {
         this.circleLeft = document.getElementsByClassName('circle--left')[0];
         this.circleRight = document.getElementsByClassName('circle--right')[0];
 
-        this.minutes = Math.floor(this.trueSessionTime / 60);
-        this.seconds = this.trueSessionTime % 60;
+        this.minutes = Math.floor(this.trueTime / 60);
+        this.seconds = this.trueTime % 60;
 
         if (this.seconds < 10) {
             this.seconds = '0' + this.seconds;
@@ -77,11 +77,15 @@ class App {
     addButtonClick(element, type, changeValue) {
         document.querySelector(`.${element.classList[0]} .${type}-${Math.abs(changeValue)}`)
             .addEventListener('click', () => {
+            if (this.trueTime === 3600 && type === 'increase') {
+                this.alert('Cannot add more time to the timer.');
+            }
+
             if (element.classList[0] === this.sessionClass) {
-                this.updateValue(changeValue);
+                this.updateValue('session', changeValue);
                 this.renderValues('session');
             } else if (element.classList[0] === this.breakClass) {
-                this.updateValue(changeValue);
+                this.updateValue('break', changeValue);
                 this.renderValues('break');
             } else {
                 console.log('ERROR: No buttons found to add EventListener.')
@@ -95,7 +99,7 @@ class App {
         element.addEventListener('click', () => {
             if (elementClass === 'controls-start') {
                 if (this.state !== 1) {
-                    if (this.trueSessionTime === 0) {
+                    if (this.trueTime === 0) {
                         this.alert('You cannot start a timer for 0 minutes.');
                         console.log('ERROR: Cannot start a timer for 0 minutes.');
                     } else {
@@ -122,7 +126,7 @@ class App {
                     this.stop();
                 }
             } else if ((elementClass === 'controls-session') || (elementClass === 'controls-break')) {
-                this.switch();
+                this.finished();
             } else {
                 console.log('ERROR: Unknown controls.');
             }
@@ -130,7 +134,11 @@ class App {
     }
 
     renderValues(valueType) {
-        if (valueType === 'session') {
+        if (valueType === 'session' && this.sessionIsActive) {
+            this.sessionValueContainer.innerText = this.value;
+        } else if (valueType === 'break' && !this.sessionIsActive) {
+            this.breakValueContainer.innerText = this.value;
+        } else if (valueType === 'session') {
             this.sessionValueContainer.innerText = this.sessionValue;
         } else if (valueType === 'break') {
             this.breakValueContainer.innerText = this.breakValue;
@@ -143,23 +151,19 @@ class App {
     }
 
     start() {
-        this.initialSessionTime = this.sessionValue * 60;
-        this.initialBreakValue = this.breakValue * 5;
-
         this.buttonStart.classList.add('active');
         this.buttonStart.innerText = 'Started';
         this.disableButton('start');
         this.state = 1;
 
         this.timerInterval = setInterval(() => {
-            this.trueSessionTime--;
-
-            if (this.trueSessionTime < 0) {
+            this.trueTime--;
+            if (this.trueTime < 0) {
                 this.finished();
             } else {
                 this.renderClock();
             }
-        }, 1000);
+        }, 10);
     }
 
     pause() {
@@ -167,23 +171,19 @@ class App {
         this.buttonPause.innerText = 'Paused';
         this.disableButton('pause');
         this.state = 2;
-
         clearInterval(this.timerInterval);
     }
 
     stop() {
-        this.trueSessionTime = this.sessionValue * 60;
+        this.trueTime = this.value * 60;
         this.disableButton('reset');
         this.state = 0;
-
         clearInterval(this.timerInterval);
-
         this.renderClock();
     }
 
     finished() {
         this.state = 0;
-
         clearInterval(this.timerInterval);
         this.switch();
     }
@@ -195,36 +195,42 @@ class App {
         }
 
         if (this.sessionIsActive) {
-            // break finished, now back to session
+            this.value = this.sessionValue;
+            this.trueTime = this.trueSessionTime;
+            this.initialTime = this.initialSessionTime;
+
             className = 'session';
 
             this.startSession.classList.add('button-hidden');
             this.startBreak.classList.remove('button-hidden');
-            [...document.getElementsByClassName('break')].map(button => button.classList.remove('break'));
-            if (!initial) {
-                this.pause();
-                this.start();
-            }
+            [...document.getElementsByClassName('break')]
+                .map(button => button.classList.remove('break'));
         } else {
-            // session finished, break time
+            this.value = this.breakValue;
+            this.trueTime = this.trueBreakTime;
+            this.initialTime = this.initialBreakTime;
+
             className = 'break';
 
             this.startSession.classList.remove('button-hidden');
             this.startBreak.classList.add('button-hidden');
-            [...document.getElementsByClassName('session')].map(button => button.classList.remove('session'));
-            if (!initial) {
-                this.pause();
-                this.start();
-            }
+            [...document.getElementsByClassName('session')]
+                .map(button => button.classList.remove('session'));
+        }
+
+        if (!initial) {
+            this.pause();
+            this.start();
         }
 
         this.wrapper.classList.add(className);
-        [...document.getElementsByClassName('button')].map(button => button.classList.add(className));
+        [...document.getElementsByClassName('button')]
+            .map(button => button.classList.add(className));
     }
 
     renderClock() {
-        this.minutes = Math.floor(this.trueSessionTime / 60);
-        this.seconds = this.trueSessionTime % 60;
+        this.minutes = Math.floor(this.trueTime / 60);
+        this.seconds = this.trueTime % 60;
 
         if (this.seconds < 10) {
             this.seconds = '0' + this.seconds;
@@ -235,9 +241,8 @@ class App {
     }
 
     renderCircle() {
-        let progress = this.initialSessionTime === 0 ? 0 : (this.initialSessionTime - this.trueSessionTime) / this.initialSessionTime * 360;
+        let progress = this.initialTime === 0 ? 0 : (this.initialTime - this.trueTime) / this.initialTime * 360;
 
-        console.log(progress);
         if (progress % 360 === 0) {
             this.circleLeft.setAttribute('style', `transform: rotate(0deg)`);
             this.circleRight.setAttribute('style', `transform: rotate(0deg)`);
@@ -295,25 +300,53 @@ class App {
             console.log('ERROR: Unknown button.');
         }
     }
-    updateValue(changeValue) {
+    updateValue(valueType, changeValue) {
         changeValue *= 60;
 
-        if (this.trueSessionTime < -changeValue) {
-            this.trueSessionTime = 0;
-            this.initialSessionTime = 0;
-        } else if (this.trueSessionTime + changeValue > 3600) {
-            this.trueSessionTime = 3600;
-            this.initialSessionTime = 3600;
-            //TODO: add info that it's not possible to add more
+        if ((valueType === 'session' && this.sessionIsActive) || (valueType === 'break' && !this.sessionIsActive)) {
+            if (this.trueTime < -changeValue) {
+                this.trueTime = 0;
+                this.initialTime = 0;
+            } else if (this.trueTime + changeValue > 3600) {
+                this.trueTime = 3600;
+                this.initialTime = 3600;
+            } else {
+                this.trueTime += changeValue;
+                this.initialTime += changeValue;
+            }
+
+            this.value = Math.floor(this.initialTime / 60);
         } else {
-            this.trueSessionTime += changeValue;
-            this.initialSessionTime += changeValue;
+            if (valueType === 'session') {
+                if (this.trueSessionTime < -changeValue) {
+                    this.trueSessionTime = 0;
+                    this.initialSessionTime = 0;
+                } else if (this.trueSessionTime + changeValue > 3600) {
+                    this.trueSessionTime = 3600;
+                    this.initialSessionTime = 3600;
+                } else {
+                    this.trueSessionTime += changeValue;
+                    this.initialSessionTime += changeValue;
+                }
+                this.sessionValue = Math.floor(this.initialSessionTime / 60);
+            } else if (valueType === 'break') {
+                if (this.trueBreakTime < -changeValue) {
+                    this.trueBreakTime = 0;
+                    this.initialBreakTime = 0;
+                } else if (this.trueBreakTime + changeValue > 3600) {
+                    this.trueBreakTime = 3600;
+                    this.initialBreakTime = 3600;
+                } else {
+                    this.trueBreakTime += changeValue;
+                    this.initialBreakTime += changeValue;
+                }
+                this.breakValue = Math.floor(this.initialBreakTime / 60);
+            }
         }
 
-        console.log(this.initialSessionTime, this.trueSessionTime, this.sessionValue);
-
-        this.sessionValue = Math.floor(this.initialSessionTime / 60);
-        this.renderClock();
+        if ((valueType === 'session' && this.sessionIsActive) || (valueType === 'break' && !this.sessionIsActive)) {
+            this.renderClock();
+        }
     }
 
     showActionIcon(type) {

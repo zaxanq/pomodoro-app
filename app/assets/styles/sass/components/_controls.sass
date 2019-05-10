@@ -1,7 +1,6 @@
 .controls-container
-  display: flex
-  justify-content: center
-  align-items: center
+  @extend %flex-center-center
+  flex-direction: column
 
   .button
     margin: 0 1rem
@@ -14,3 +13,12 @@
 
       &::before
         content: none
+
+  .switch,
+  .controls
+    flex: 1
+    @extend %flex-center-center
+
+  .controls-session,
+  .controls-break
+    margin: 0
