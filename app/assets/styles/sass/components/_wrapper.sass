@@ -3,8 +3,14 @@
   flex-direction: column
   +size($wrapper-width, $wrapper-height)
   +max-size(74vw, 74vw)
-  background: $wrapper-background
+  transition: 0.2s ease-in-out
   @extend %absolute-center
+
+  &.session
+    background: $wrapper-session-background
+
+  &.break
+    background: $wrapper-break-background
 
 .timer-container
   flex: 5

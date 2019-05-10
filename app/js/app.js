@@ -1,5 +1,8 @@
 class App {
     init() {
+        this.root = document.getElementsByClassName('root')[0];
+        this.wrapper = document.getElementsByClassName('wrapper')[0];
+
         this.initControls();
         this.initSettings();
         this.initTimer();
@@ -7,13 +10,22 @@ class App {
 
     initControls() {
         this.state = 0;
+        this.sessionIsActive = true;
         this.buttonStart = document.getElementsByClassName('controls-start')[0];
         this.buttonPause = document.getElementsByClassName('controls-pause')[0];
         this.buttonReset = document.getElementsByClassName('controls-reset')[0];
 
+        this.startSession = document.getElementsByClassName('controls-session')[0];
+        this.startBreak = document.getElementsByClassName('controls-break')[0];
+
+        this.switch(true);
+
         this.addOnClick(this.buttonStart);
         this.addOnClick(this.buttonPause);
         this.addOnClick(this.buttonReset);
+
+        this.addOnClick(this.startSession);
+        this.addOnClick(this.startBreak);
     }
 
     initSettings() {
@@ -81,14 +93,13 @@ class App {
         let elementClass = element.classList[2];
 
         element.addEventListener('click', () => {
-            this.clearButtons();
-
             if (elementClass === 'controls-start') {
                 if (this.state !== 1) {
                     if (this.trueSessionTime === 0) {
                         this.alert('You cannot start a timer for 0 minutes.');
                         console.log('ERROR: Cannot start a timer for 0 minutes.');
                     } else {
+                        this.showActionIcon('start');
                         this.start();
                     }
                 }
@@ -110,17 +121,12 @@ class App {
                     this.showActionIcon('reset');
                     this.stop();
                 }
+            } else if ((elementClass === 'controls-session') || (elementClass === 'controls-break')) {
+                this.switch();
             } else {
                 console.log('ERROR: Unknown controls.');
             }
         });
-    }
-
-    clearButtons() {
-        this.buttonStart.innerText = 'Start';
-        this.buttonStart.classList.remove('active');
-        this.buttonPause.innerText = 'Pause';
-        this.buttonPause.classList.remove('active');
     }
 
     renderValues(valueType) {
@@ -140,7 +146,6 @@ class App {
         this.initialSessionTime = this.sessionValue * 60;
         this.initialBreakValue = this.breakValue * 5;
 
-        this.showActionIcon('start');
         this.buttonStart.classList.add('active');
         this.buttonStart.innerText = 'Started';
         this.disableButton('start');
@@ -178,9 +183,43 @@ class App {
 
     finished() {
         this.state = 0;
-        this.clearButtons();
 
         clearInterval(this.timerInterval);
+        this.switch();
+    }
+
+    switch(initial = false) {
+        let className;
+        if (!initial) {
+            this.sessionIsActive = !this.sessionIsActive;
+        }
+
+        if (this.sessionIsActive) {
+            // break finished, now back to session
+            className = 'session';
+
+            this.startSession.classList.add('button-hidden');
+            this.startBreak.classList.remove('button-hidden');
+            [...document.getElementsByClassName('break')].map(button => button.classList.remove('break'));
+            if (!initial) {
+                this.pause();
+                this.start();
+            }
+        } else {
+            // session finished, break time
+            className = 'break';
+
+            this.startSession.classList.remove('button-hidden');
+            this.startBreak.classList.add('button-hidden');
+            [...document.getElementsByClassName('session')].map(button => button.classList.remove('session'));
+            if (!initial) {
+                this.pause();
+                this.start();
+            }
+        }
+
+        this.wrapper.classList.add(className);
+        [...document.getElementsByClassName('button')].map(button => button.classList.add(className));
     }
 
     renderClock() {
@@ -228,11 +267,17 @@ class App {
 
             this.buttonPause.classList.remove('disabled');
             this.buttonReset.classList.remove('disabled');
+
+            this.buttonPause.innerText = 'Pause';
+            this.buttonPause.classList.remove('active');
         } else if (button === 'pause') {
             this.buttonPause.classList.add('disabled');
 
             this.buttonStart.classList.remove('disabled');
             this.buttonReset.classList.remove('disabled');
+
+            this.buttonStart.innerText = 'Start';
+            this.buttonStart.classList.remove('active');
         } else if (button === 'reset') {
             this.buttonReset.classList.add('disabled');
             setTimeout(() => {
@@ -241,6 +286,11 @@ class App {
 
             this.buttonStart.classList.remove('disabled');
             this.buttonPause.classList.remove('disabled');
+
+            this.buttonStart.innerText = 'Start';
+            this.buttonStart.classList.remove('active');
+            this.buttonPause.innerText = 'Pause';
+            this.buttonPause.classList.remove('active');
         } else {
             console.log('ERROR: Unknown button.');
         }

@@ -3,14 +3,25 @@
   width: 84px
   position: relative
   border: 0.1rem solid $button-border-color
-  background-color: $color-primary-400
   color: inherit
   font-weight: 400
   font-size: 1.4rem
   font-family: inherit
   outline: none
-  transition: 0.1s ease-in-out
+  transition: 0.2s ease-in-out
   cursor: pointer
+
+  &.session
+    background-color: $wrapper-session-background
+
+    &:active
+      color: $color-session-500
+
+  &.break
+    background-color: $wrapper-break-background
+
+    &:active
+      color: $color-break-500
 
   &.disabled
     pointer-events: none
@@ -26,7 +37,6 @@
 
   &:active
     background-color: rgba($button-border-color, 0.7)
-    color: $color-primary-500
     border-color: rgba($button-border-color, 0)
 
   &-with-text
@@ -56,3 +66,11 @@
       top: 0
       opacity: 0.16
       z-index: -1
+
+  &-absolute
+    position: absolute
+    right: 0
+
+  &-hidden
+    opacity: 0
+    pointer-events: none
