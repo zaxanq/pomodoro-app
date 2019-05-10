@@ -30,10 +30,10 @@ class App {
 
     initSettings() {
         this.sessionValue = 25;
-        this.trueSessionTime = this.sessionValue * 60;
-        this.initialSessionTime = this.trueSessionTime;
         this.breakValue = 5;
+        this.trueSessionTime = this.sessionValue * 60;
         this.trueBreakTime = this.breakValue * 60;
+        this.initialSessionTime = this.trueSessionTime;
         this.initialBreakTime = this.trueBreakTime;
 
         this.sessionClass = 'settings__session';
@@ -158,6 +158,7 @@ class App {
 
         this.timerInterval = setInterval(() => {
             this.trueTime--;
+            console.log(this.trueTime);
             if (this.trueTime < 0) {
                 this.finished();
             } else {
@@ -196,6 +197,10 @@ class App {
 
         if (this.sessionIsActive) {
             this.value = this.sessionValue;
+
+            this.trueSessionTime = this.sessionValue * 60;
+            this.initialSessionTime = this.trueSessionTime;
+
             this.trueTime = this.trueSessionTime;
             this.initialTime = this.initialSessionTime;
 
@@ -207,6 +212,10 @@ class App {
                 .map(button => button.classList.remove('break'));
         } else {
             this.value = this.breakValue;
+
+            this.trueBreakTime = this.breakValue * 60;
+            this.initialBreakTime = this.trueBreakTime;
+
             this.trueTime = this.trueBreakTime;
             this.initialTime = this.initialBreakTime;
 
@@ -316,6 +325,11 @@ class App {
             }
 
             this.value = Math.floor(this.initialTime / 60);
+            if (this.sessionIsActive) {
+                this.sessionValue = this.value;
+            } else {
+                this.breakValue = this.value;
+            }
         } else {
             if (valueType === 'session') {
                 if (this.trueSessionTime < -changeValue) {
