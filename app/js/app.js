@@ -158,7 +158,6 @@ class App {
 
         this.timerInterval = setInterval(() => {
             this.trueTime--;
-            console.log(this.trueTime);
             if (this.trueTime < 0) {
                 this.finished();
             } else {
@@ -195,7 +194,22 @@ class App {
             this.sessionIsActive = !this.sessionIsActive;
         }
 
-        if (this.sessionIsActive) {
+        if (this.initialSessionTime === 0) {
+            this.value = this.sessionValue;
+
+            this.trueSessionTime = this.sessionValue * 60;
+            this.initialSessionTime = this.trueSessionTime;
+
+            className = 'session';
+
+            this.trueTime = this.trueSessionTime;
+            this.initialTime = this.initialSessionTime;
+
+            this.stop();
+            this.alert('Cannot start a timer for 0 minutes.');
+            console.log('ERROR: Cannot start a timer for 0 minutes.');
+        }
+        else if (this.initialBreakTime === 0) {
             this.value = this.sessionValue;
 
             this.trueSessionTime = this.sessionValue * 60;
@@ -206,30 +220,45 @@ class App {
 
             className = 'session';
 
-            this.startSession.classList.add('button-hidden');
-            this.startBreak.classList.remove('button-hidden');
-            [...document.getElementsByClassName('break')]
-                .map(button => button.classList.remove('break'));
+            this.stop();
+            this.alert('Is there a point in using this timer with 0 break time? :)');
         } else {
-            this.value = this.breakValue;
+            if (this.sessionIsActive) {
+                this.value = this.sessionValue;
 
-            this.trueBreakTime = this.breakValue * 60;
-            this.initialBreakTime = this.trueBreakTime;
+                this.trueSessionTime = this.sessionValue * 60;
+                this.initialSessionTime = this.trueSessionTime;
 
-            this.trueTime = this.trueBreakTime;
-            this.initialTime = this.initialBreakTime;
+                this.trueTime = this.trueSessionTime;
+                this.initialTime = this.initialSessionTime;
 
-            className = 'break';
+                className = 'session';
 
-            this.startSession.classList.remove('button-hidden');
-            this.startBreak.classList.add('button-hidden');
-            [...document.getElementsByClassName('session')]
-                .map(button => button.classList.remove('session'));
-        }
+                this.startSession.classList.add('button-hidden');
+                this.startBreak.classList.remove('button-hidden');
+                [...document.getElementsByClassName('break')]
+                    .map(button => button.classList.remove('break'));
+            } else {
+                this.value = this.breakValue;
 
-        if (!initial) {
-            this.pause();
-            this.start();
+                this.trueBreakTime = this.breakValue * 60;
+                this.initialBreakTime = this.trueBreakTime;
+
+                this.trueTime = this.trueBreakTime;
+                this.initialTime = this.initialBreakTime;
+
+                className = 'break';
+
+                this.startSession.classList.remove('button-hidden');
+                this.startBreak.classList.add('button-hidden');
+                [...document.getElementsByClassName('session')]
+                    .map(button => button.classList.remove('session'));
+            }
+
+            if (!initial) {
+                this.pause();
+                this.start();
+            }
         }
 
         this.wrapper.classList.add(className);
