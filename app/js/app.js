@@ -10,9 +10,6 @@ class App {
 
     /*
        current buglist:
-        *   session time change works only when break mode is active (no need for running timer) while
-            break time change works only when session mode is active
-                these 2 need to be solved probably in renderValue() method.
         *   setting session time to 0 during running timer will stop the timer. but even if we change session time
             we still cannot start the timer.
                 however pressing break button sets session time to what we changed it. worth checking out.
@@ -150,17 +147,37 @@ class App {
     }
 
     renderValues(valueType) {
-        if (valueType === 'session' && this.sessionIsActive) {
+        if (valueType === 'initial') {
+            this.sessionValueContainer.innerText = this.sessionValue;
+            this.breakValueContainer.innerText = this.breakValue;
+
+            this.trueSessionTime = this.sessionValue * 60;
+            this.initialSessionTime = this.trueSessionTime;
+
+            this.trueBreakTime = this.breakValue * 60;
+            this.initialBreakTime = this.trueBreakTime;
+        } else if (valueType === 'session' && this.sessionIsActive) {
             this.sessionValueContainer.innerText = this.value;
+
+            this.sessionValue = this.value;
+            this.trueSessionTime = this.sessionValue * 60;
+            this.initialSessionTime = this.trueSessionTime;
         } else if (valueType === 'break' && !this.sessionIsActive) {
             this.breakValueContainer.innerText = this.value;
+
+            this.breakValue = this.value;
+            this.trueBreakTime = this.breakValue * 60;
+            this.initialBreakTime = this.trueBreakTime;
         } else if (valueType === 'session') {
             this.sessionValueContainer.innerText = this.sessionValue;
+
+            this.trueSessionTime = this.sessionValue * 60;
+            this.initialSessionTime = this.trueSessionTime;
         } else if (valueType === 'break') {
             this.breakValueContainer.innerText = this.breakValue;
-        } else if (valueType === 'initial') {
-            this.sessionValueContainer.innerText = this.sessionValue;
-            this.breakValueContainer.innerText = this.breakValue;
+
+            this.trueBreakTime = this.breakValue * 60;
+            this.initialBreakTime = this.trueBreakTime;
         } else {
             console.log('ERROR: Undefined value container.');
         }
@@ -174,12 +191,12 @@ class App {
 
         this.timerInterval = setInterval(() => {
             this.trueTime--;
-            if (this.trueTime < 0) {
+            if (this.trueTime === 0) {
                 this.finished();
             } else {
                 this.renderClock();
             }
-        }, 10);
+        }, 1000);
     }
 
     pause() {
@@ -240,8 +257,10 @@ class App {
             this.alert('Is there a point in using this timer with 0 break time? :)');
         } else {
             if (this.sessionIsActive) {
+                if (typeof this.value !== 'undefined') {
+                    this.breakValue = this.value;
+                }
                 this.value = this.sessionValue;
-
                 this.trueSessionTime = this.sessionValue * 60;
                 this.initialSessionTime = this.trueSessionTime;
 
@@ -255,6 +274,9 @@ class App {
                 [...document.getElementsByClassName('break')]
                     .map(button => button.classList.remove('break'));
             } else {
+                if (typeof this.value !== 'undefined') {
+                    this.sessionValue = this.value;
+                }
                 this.value = this.breakValue;
 
                 this.trueBreakTime = this.breakValue * 60;
@@ -365,11 +387,19 @@ class App {
                 this.trueTime = 3600;
                 this.initialTime = 3600;
             } else {
+                console.log(this.trueTime, this.initialTime);
                 this.trueTime += changeValue;
                 this.initialTime += changeValue;
+                console.log('trueTime + 60', 'initialTime + 60');
+                console.log(this.trueTime, this.initialTime);
             }
 
             this.value = Math.floor(this.initialTime / 60);
+            // if (valueType === 'session') {
+            //     this.sessionValue = Math.floor(this.initialSessionTime / 60);
+            // } else if (valueType === 'break') {
+            //     this.breakValue = Math.floor(this.initialBreakTime / 60);
+            // }
             if (this.sessionIsActive) {
                 this.sessionValue = this.value;
             } else {
