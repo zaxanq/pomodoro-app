@@ -1,6 +1,5 @@
 class App {
     init() {
-        this.root = document.getElementsByClassName('root')[0];
         this.wrapper = document.getElementsByClassName('wrapper')[0];
 
         this.initSettings();
@@ -44,18 +43,19 @@ class App {
     initSettings() {
         this.sessionValue = 25;
         this.breakValue = 5;
-        this.trueSessionTime = this.sessionValue * 60;
-        this.trueBreakTime = this.breakValue * 60;
-        this.initialSessionTime = this.trueSessionTime;
-        this.initialBreakTime = this.trueBreakTime;
+        this.updateTimes(this._session);
+        this.updateTimes(this._break);
 
-        this.sessionClass = 'settings__session';
+
+        this._session = 'session';
+        this._break = 'break';
+        this.sessionClass = `settings__${this._session}`;
         this.session = document.getElementsByClassName(this.sessionClass)[0];
-        this.breakClass = 'settings__break';
+        this.breakClass = `settings__${this._break}`;
         this.break = document.getElementsByClassName(this.breakClass)[0];
 
-        this.sessionValueContainer = document.getElementsByClassName('session-value')[0];
-        this.breakValueContainer = document.getElementsByClassName('break-value')[0];
+        this.sessionValueContainer = document.getElementsByClassName(`${this._session}-value`)[0];
+        this.breakValueContainer = document.getElementsByClassName(`${this._break}-value`)[0];
 
         this.displayedTime = document.getElementsByClassName('current-time')[0];
 
@@ -95,11 +95,11 @@ class App {
             }
 
             if (element.classList[0] === this.sessionClass) {
-                this.updateValue('session', changeValue);
-                this.renderValues('session');
+                this.updateValue(this._session, changeValue);
+                this.renderValues(this._session);
             } else if (element.classList[0] === this.breakClass) {
-                this.updateValue('break', changeValue);
-                this.renderValues('break');
+                this.updateValue(this._break, changeValue);
+                this.renderValues(this._break);
             } else {
                 console.log('ERROR: No buttons found to add EventListener.')
             }
@@ -138,7 +138,7 @@ class App {
                     this.showActionIcon('reset');
                     this.stop();
                 }
-            } else if ((elementClass === 'controls-session') || (elementClass === 'controls-break')) {
+            } else if ((elementClass === `controls-${this._session}`) || (elementClass === `controls-${this._break}`)) {
                 this.finished();
             } else {
                 console.log('ERROR: Unknown controls.');
@@ -146,38 +146,59 @@ class App {
         });
     }
 
+    setContainer(type, value) {
+        if (type === this._session) {
+            this.sessionValueContainer.innerText =  value;
+        } else if (type === this._break) {
+            this.breakValueContainer.innerText =  value;
+        }
+    }
+
+    updateTimes(type, trueTimes = false) {
+        if (type === this._session) {
+            this.trueSessionTime = this.sessionValue * 60;
+            this.initialSessionTime = this.trueSessionTime;
+
+            if (trueTimes) {
+                this.trueTime = this.trueSessionTime;
+                this.initialTime = this.initialSessionTime;
+            }
+        } else if (type === this._break) {
+            this.trueBreakTime = this.breakValue * 60;
+            this.initialBreakTime = this.trueBreakTime;
+
+            if (trueTimes) {
+                this.trueTime = this.trueBreakTime;
+                this.initialTime = this.initialBreakTime;
+            }
+        }
+    }
+
     renderValues(valueType) {
         if (valueType === 'initial') {
-            this.sessionValueContainer.innerText = this.sessionValue;
-            this.breakValueContainer.innerText = this.breakValue;
+            this.setContainer(this._session, this.sessionValue);
+            this.setContainer(this._break, this.breakValue);
+            this.updateTimes(this._session);
+            this.updateTimes(this._break);
 
-            this.trueSessionTime = this.sessionValue * 60;
-            this.initialSessionTime = this.trueSessionTime;
-
-            this.trueBreakTime = this.breakValue * 60;
-            this.initialBreakTime = this.trueBreakTime;
-        } else if (valueType === 'session' && this.sessionIsActive) {
-            this.sessionValueContainer.innerText = this.value;
-
+        } else if (valueType === this._session && this.sessionIsActive) {
+            this.setContainer(this._session, this.value);
             this.sessionValue = this.value;
-            this.trueSessionTime = this.sessionValue * 60;
-            this.initialSessionTime = this.trueSessionTime;
-        } else if (valueType === 'break' && !this.sessionIsActive) {
-            this.breakValueContainer.innerText = this.value;
+            this.updateTimes(this._session);
 
+        } else if (valueType === this._break && !this.sessionIsActive) {
+            this.setContainer(this._break, this.value);
             this.breakValue = this.value;
-            this.trueBreakTime = this.breakValue * 60;
-            this.initialBreakTime = this.trueBreakTime;
-        } else if (valueType === 'session') {
-            this.sessionValueContainer.innerText = this.sessionValue;
+            this.updateTimes(this._break);
 
-            this.trueSessionTime = this.sessionValue * 60;
-            this.initialSessionTime = this.trueSessionTime;
-        } else if (valueType === 'break') {
-            this.breakValueContainer.innerText = this.breakValue;
+        } else if (valueType === this._session) {
+            this.setContainer(this._session, this.sessionValue);
+            this.updateTimes(this._session);
 
-            this.trueBreakTime = this.breakValue * 60;
-            this.initialBreakTime = this.trueBreakTime;
+        } else if (valueType === this._break) {
+            this.setContainer(this._break, this.breakValue);
+            this.updateTimes(this._break);
+
         } else {
             console.log('ERROR: Undefined value container.');
         }
@@ -191,7 +212,7 @@ class App {
 
         this.timerInterval = setInterval(() => {
             this.trueTime--;
-            if (this.trueTime === 0) {
+            if (this.trueTime < 0) {
                 this.finished();
             } else {
                 this.renderClock();
@@ -221,6 +242,17 @@ class App {
         this.switch();
     }
 
+    switchButtons(sessionIsActive) {
+        let buttonHidden = 'button-hidden';
+        if (sessionIsActive) {
+            this.startSession.classList.add(buttonHidden);
+            this.startBreak.classList.remove(buttonHidden);
+        } else {
+            this.startSession.classList.remove(buttonHidden);
+            this.startBreak.classList.add(buttonHidden);
+        }
+    }
+
     switch(initial = false) {
         let className;
         if (!initial) {
@@ -229,14 +261,7 @@ class App {
 
         if (this.initialSessionTime === 0) {
             this.value = this.sessionValue;
-
-            this.trueSessionTime = this.sessionValue * 60;
-            this.initialSessionTime = this.trueSessionTime;
-
-            className = 'session';
-
-            this.trueTime = this.trueSessionTime;
-            this.initialTime = this.initialSessionTime;
+            className = this._session;
 
             this.stop();
             this.alert('Cannot start a timer for 0 minutes.');
@@ -244,14 +269,7 @@ class App {
         }
         else if (this.initialBreakTime === 0) {
             this.value = this.sessionValue;
-
-            this.trueSessionTime = this.sessionValue * 60;
-            this.initialSessionTime = this.trueSessionTime;
-
-            this.trueTime = this.trueSessionTime;
-            this.initialTime = this.initialSessionTime;
-
-            className = 'session';
+            className = this._session;
 
             this.stop();
             this.alert('Is there a point in using this timer with 0 break time? :)');
@@ -261,36 +279,21 @@ class App {
                     this.breakValue = this.value;
                 }
                 this.value = this.sessionValue;
-                this.trueSessionTime = this.sessionValue * 60;
-                this.initialSessionTime = this.trueSessionTime;
+                className = this._session;
 
-                this.trueTime = this.trueSessionTime;
-                this.initialTime = this.initialSessionTime;
-
-                className = 'session';
-
-                this.startSession.classList.add('button-hidden');
-                this.startBreak.classList.remove('button-hidden');
-                [...document.getElementsByClassName('break')]
-                    .map(button => button.classList.remove('break'));
+                this.switchButtons(true);
+                [...document.getElementsByClassName(this._break)]
+                    .map(button => button.classList.remove(this._break));
             } else {
                 if (typeof this.value !== 'undefined') {
                     this.sessionValue = this.value;
                 }
                 this.value = this.breakValue;
+                className = this._break;
 
-                this.trueBreakTime = this.breakValue * 60;
-                this.initialBreakTime = this.trueBreakTime;
-
-                this.trueTime = this.trueBreakTime;
-                this.initialTime = this.initialBreakTime;
-
-                className = 'break';
-
-                this.startSession.classList.remove('button-hidden');
-                this.startBreak.classList.add('button-hidden');
-                [...document.getElementsByClassName('session')]
-                    .map(button => button.classList.remove('session'));
+                this.switchButtons(false);
+                [...document.getElementsByClassName(this._session)]
+                    .map(button => button.classList.remove(this._session));
             }
 
             if (!initial) {
@@ -298,6 +301,8 @@ class App {
                 this.start();
             }
         }
+
+        this.updateTimes(className, true);
 
         this.wrapper.classList.add(className);
         [...document.getElementsByClassName('button')]
@@ -379,7 +384,7 @@ class App {
     updateValue(valueType, changeValue) {
         changeValue *= 60;
 
-        if ((valueType === 'session' && this.sessionIsActive) || (valueType === 'break' && !this.sessionIsActive)) {
+        if ((valueType === this._session && this.sessionIsActive) || (valueType === this._break && !this.sessionIsActive)) {
             if (this.trueTime < -changeValue) {
                 this.trueTime = 0;
                 this.initialTime = 0;
@@ -395,18 +400,13 @@ class App {
             }
 
             this.value = Math.floor(this.initialTime / 60);
-            // if (valueType === 'session') {
-            //     this.sessionValue = Math.floor(this.initialSessionTime / 60);
-            // } else if (valueType === 'break') {
-            //     this.breakValue = Math.floor(this.initialBreakTime / 60);
-            // }
             if (this.sessionIsActive) {
                 this.sessionValue = this.value;
             } else {
                 this.breakValue = this.value;
             }
         } else {
-            if (valueType === 'session') {
+            if (valueType === this._session) {
                 if (this.trueSessionTime < -changeValue) {
                     this.trueSessionTime = 0;
                     this.initialSessionTime = 0;
@@ -418,7 +418,7 @@ class App {
                     this.initialSessionTime += changeValue;
                 }
                 this.sessionValue = Math.floor(this.initialSessionTime / 60);
-            } else if (valueType === 'break') {
+            } else if (valueType === this._break) {
                 if (this.trueBreakTime < -changeValue) {
                     this.trueBreakTime = 0;
                     this.initialBreakTime = 0;
@@ -433,7 +433,7 @@ class App {
             }
         }
 
-        if ((valueType === 'session' && this.sessionIsActive) || (valueType === 'break' && !this.sessionIsActive)) {
+        if ((valueType === this._session && this.sessionIsActive) || (valueType === this._break && !this.sessionIsActive)) {
             this.renderClock();
         }
     }
