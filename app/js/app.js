@@ -14,6 +14,8 @@ class App {
                 however pressing break button sets session time to what we changed it. worth checking out.
         *   if we start the timer (with session time smaller than 60 (!)) and keep current time below 60 minutes
             we can keep increasing session time for how long we want, even though it should max at 60.
+        *   setting break time to 0 during running timer will stop the timer with green layout but with logic
+            of session (red layout).
 
         feature-add list:
         *   maybe max time should be 120 minutes instead of 60, or maybe as much one desires (max 720?)
@@ -90,8 +92,14 @@ class App {
     addButtonClick(element, type, changeValue) {
         document.querySelector(`.${element.classList[0]} .${type}-${Math.abs(changeValue)}`)
             .addEventListener('click', () => {
-            if (this.trueTime === 3600 && type === 'increase') {
+                /*TODO: Add separation so that alert only shows when we are pressing button to actually click
+                    for more than 60 or less than 0. Currently if we set break time to 0 and change session value
+                    the alert keeps showing.
+                 */
+            if ((this.trueSessionTime === 3600 || this.trueBreakTime === 3600) && type === 'increase') {
                 this.alert('Cannot add more time to the timer.');
+            } else if ((this.trueSessionTime === 0 || this.trueBreakTime === 0) && type === 'decrease') {
+                this.alert('Time value cannot be less than 0.');
             }
 
             if (element.classList[0] === this.sessionClass) {
@@ -388,15 +396,14 @@ class App {
             if (this.trueTime < -changeValue) {
                 this.trueTime = 0;
                 this.initialTime = 0;
+
             } else if (this.trueTime + changeValue > 3600) {
                 this.trueTime = 3600;
                 this.initialTime = 3600;
+
             } else {
-                console.log(this.trueTime, this.initialTime);
                 this.trueTime += changeValue;
                 this.initialTime += changeValue;
-                console.log('trueTime + 60', 'initialTime + 60');
-                console.log(this.trueTime, this.initialTime);
             }
 
             this.value = Math.floor(this.initialTime / 60);
@@ -410,9 +417,11 @@ class App {
                 if (this.trueSessionTime < -changeValue) {
                     this.trueSessionTime = 0;
                     this.initialSessionTime = 0;
+
                 } else if (this.trueSessionTime + changeValue > 3600) {
                     this.trueSessionTime = 3600;
                     this.initialSessionTime = 3600;
+
                 } else {
                     this.trueSessionTime += changeValue;
                     this.initialSessionTime += changeValue;
@@ -422,9 +431,11 @@ class App {
                 if (this.trueBreakTime < -changeValue) {
                     this.trueBreakTime = 0;
                     this.initialBreakTime = 0;
+
                 } else if (this.trueBreakTime + changeValue > 3600) {
                     this.trueBreakTime = 3600;
                     this.initialBreakTime = 3600;
+
                 } else {
                     this.trueBreakTime += changeValue;
                     this.initialBreakTime += changeValue;
