@@ -218,6 +218,8 @@ class App {
         this.disableButton('start');
         this.state = 1;
 
+        this.hideActionPauseIcon();
+
         this.timerInterval = setInterval(() => {
             this.trueTime--;
             if (this.trueTime < 0) {
@@ -225,7 +227,7 @@ class App {
             } else {
                 this.renderClock();
             }
-        }, 1000);
+        }, 10);
     }
 
     pause() {
@@ -240,12 +242,18 @@ class App {
         this.trueTime = this.value * 60;
         this.disableButton('reset');
         this.state = 0;
+
+        this.hideActionPauseIcon();
+
         clearInterval(this.timerInterval);
         this.renderClock();
     }
 
     finished() {
         this.state = 0;
+
+        this.hideActionPauseIcon();
+
         clearInterval(this.timerInterval);
         this.switch();
     }
@@ -450,11 +458,23 @@ class App {
     }
 
     showActionIcon(type) {
-        document.getElementsByClassName(`action-${type}`)[0].classList.remove('hidden');
+        let actionContainer = document.getElementsByClassName(`action-${type}`)[0];
+        if (type !== 'pause') {
+            actionContainer.classList.remove('hidden');
 
-        setTimeout(() => {
-            document.getElementsByClassName(`action-${type}`)[0].classList.add('hidden');
-        }, 400)
+            setTimeout(() => {
+                actionContainer.classList.add('hidden');
+            }, 400);
+        } else {
+            actionContainer.classList.remove('hidden');
+            actionContainer.classList.add('paused');
+        }
+    }
+
+    hideActionPauseIcon() {
+        let actionContainer = document.getElementsByClassName(`action-pause`)[0];
+        actionContainer.classList.add('hidden');
+        actionContainer.classList.remove('paused');
     }
 
     toInput() {
