@@ -9,9 +9,6 @@ class App {
 
     /*
        current buglist:
-        *   setting session time to 0 during running timer will stop the timer. but even if we change session time
-            we still cannot start the timer.
-                however pressing break button sets session time to what we changed it. worth checking out.
         *   if we start the timer (with session time smaller than 60 (!)) and keep current time below 60 minutes
             we can keep increasing session time for how long we want, even though it should max at 60.
         *   setting break time to 0 during running timer will stop the timer with green layout but with logic
@@ -23,8 +20,6 @@ class App {
      */
 
     initControls() {
-        this.state = 0;
-        this.sessionIsActive = true;
         this.buttonStart = document.getElementsByClassName('controls-start')[0];
         this.buttonPause = document.getElementsByClassName('controls-pause')[0];
         this.buttonReset = document.getElementsByClassName('controls-reset')[0];
@@ -43,11 +38,11 @@ class App {
     }
 
     initSettings() {
+        this.state = 0;
+        this.sessionIsActive = true;
+
         this.sessionValue = 25;
         this.breakValue = 5;
-        this.updateTimes(this._session);
-        this.updateTimes(this._break);
-
 
         this._session = 'session';
         this._break = 'break';
@@ -222,12 +217,12 @@ class App {
 
         this.timerInterval = setInterval(() => {
             this.trueTime--;
-            if (this.trueTime < 0) {
+            if (this.trueTime <= 0) {
                 this.finished();
             } else {
                 this.renderClock();
             }
-        }, 10);
+        }, 1000);
     }
 
     pause() {
@@ -271,7 +266,7 @@ class App {
 
     switch(initial = false) {
         let className;
-        if (!initial) {
+        if (!initial && this.initialSessionTime !== 0 && this.initialBreakTime !== 0) {
             this.sessionIsActive = !this.sessionIsActive;
         }
 
@@ -401,7 +396,7 @@ class App {
         changeValue *= 60;
 
         if ((valueType === this._session && this.sessionIsActive) || (valueType === this._break && !this.sessionIsActive)) {
-            if (this.trueTime < -changeValue) {
+            if (this.trueTime <= -changeValue) {
                 this.trueTime = 0;
                 this.initialTime = 0;
 
