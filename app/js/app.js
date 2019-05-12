@@ -1,7 +1,7 @@
 class App {
     init() {
         this.wrapper = document.getElementsByClassName('wrapper')[0];
-        this.timeDebugging = 1000;
+        this.timeDebugging = 10;
         this.initSettings();
         this.initControls();
         this.initTimer();
@@ -266,13 +266,20 @@ class App {
 
     switch(initial = false) {
         let className;
-        if (!initial && this.initialSessionTime !== 0 && this.initialBreakTime !== 0) {
+        if (!initial &&
+            ((this.initialSessionTime !== 0 && this.initialBreakTime !== 0) ||
+                (this.initialSessionTime === 0 && !this.sessionIsActive))) {
             this.sessionIsActive = !this.sessionIsActive;
+            console.log('session = !session');
         }
 
         if (this.initialSessionTime === 0) {
             this.value = this.sessionValue;
             className = this._session;
+
+            this.switchButtons( true);
+            [...document.getElementsByClassName(this._session)]
+                .map(button => button.classList.remove(this._session));
 
             this.stop();
             this.alert('You cannot start a timer for 0 minutes.');
