@@ -1,7 +1,7 @@
 class App {
     init() {
         this.wrapper = document.getElementsByClassName('wrapper')[0];
-
+        this.timeDebugging = 1000;
         this.initSettings();
         this.initControls();
         this.initTimer();
@@ -9,13 +9,10 @@ class App {
 
     /*
        current buglist:
-        *   if we start the timer (with session time smaller than 60 (!)) and keep current time below 60 minutes
-            we can keep increasing session time for how long we want, even though it should max at 60.
         *   setting break time to 0 during running timer will stop the timer with green layout but with logic
             of session (red layout).
 
         feature-add list:
-        *   maybe max time should be 120 minutes instead of 60, or maybe as much one desires (max 720?)
         *   session time number to change into input at click
      */
 
@@ -41,8 +38,11 @@ class App {
         this.state = 0;
         this.sessionIsActive = true;
 
-        this.sessionValue = 25;
-        this.breakValue = 5;
+        this.sessionValue = 25; // [minutes]
+        this.breakValue = 5; // [minutes]
+
+        this.maximumTime = 240; // [minutes]
+        this.maximumTime *= 60;
 
         this._session = 'session';
         this._break = 'break';
@@ -88,8 +88,8 @@ class App {
         let elementClass = element.classList[0];
         document.querySelector(`.${elementClass} .${type}-${Math.abs(changeValue)}`)
             .addEventListener('click', () => {
-            if (((this.trueSessionTime === 3600 && elementClass === this.sessionClass) ||
-                (this.trueBreakTime === 3600 && elementClass === this.breakClass)) && type === 'increase') {
+            if (((this.trueSessionTime === this.maximumTime && elementClass === this.sessionClass) ||
+                (this.trueBreakTime === this.maximumTime && elementClass === this.breakClass)) && type === 'increase') {
                 this.alert('Cannot add more time to the timer.');
 
             } else if (((this.trueSessionTime === 0 && elementClass === this.sessionClass) ||
@@ -222,7 +222,7 @@ class App {
             } else {
                 this.renderClock();
             }
-        }, 1000);
+        }, this.timeDebugging);
     }
 
     pause() {
@@ -396,13 +396,13 @@ class App {
         changeValue *= 60;
 
         if ((valueType === this._session && this.sessionIsActive) || (valueType === this._break && !this.sessionIsActive)) {
-            if (this.trueTime <= -changeValue) {
+            if (this.initialTime <= -changeValue) {
                 this.trueTime = 0;
                 this.initialTime = 0;
 
-            } else if (this.trueTime + changeValue > 3600) {
-                this.trueTime = 3600;
-                this.initialTime = 3600;
+            } else if (this.initialTime + changeValue > this.maximumTime) {
+                this.trueTime += this.maximumTime - this.initialTime;
+                this.initialTime = this.maximumTime;
 
             } else {
                 this.trueTime += changeValue;
@@ -421,9 +421,9 @@ class App {
                     this.trueSessionTime = 0;
                     this.initialSessionTime = 0;
 
-                } else if (this.trueSessionTime + changeValue > 3600) {
-                    this.trueSessionTime = 3600;
-                    this.initialSessionTime = 3600;
+                } else if (this.trueSessionTime + changeValue > this.maximumTime) {
+                    this.trueSessionTime = this.maximumTime;
+                    this.initialSessionTime = this.maximumTime;
 
                 } else {
                     this.trueSessionTime += changeValue;
@@ -435,9 +435,9 @@ class App {
                     this.trueBreakTime = 0;
                     this.initialBreakTime = 0;
 
-                } else if (this.trueBreakTime + changeValue > 3600) {
-                    this.trueBreakTime = 3600;
-                    this.initialBreakTime = 3600;
+                } else if (this.trueBreakTime + changeValue > this.maximumTime) {
+                    this.trueBreakTime = this.maximumTime;
+                    this.initialBreakTime = this.maximumTime;
 
                 } else {
                     this.trueBreakTime += changeValue;

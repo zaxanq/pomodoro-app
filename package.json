@@ -1,6 +1,6 @@
 {
   "name": "pomodoro-app",
-  "version": "0.6.0",
+  "version": "0.6.2",
   "description": "",
   "main": "gulpfile.js",
   "scripts": {
