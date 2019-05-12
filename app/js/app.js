@@ -90,22 +90,22 @@ class App {
     }
 
     addButtonClick(element, type, changeValue) {
-        document.querySelector(`.${element.classList[0]} .${type}-${Math.abs(changeValue)}`)
+        let elementClass = element.classList[0];
+        document.querySelector(`.${elementClass} .${type}-${Math.abs(changeValue)}`)
             .addEventListener('click', () => {
-                /*TODO: Add separation so that alert only shows when we are pressing button to actually click
-                    for more than 60 or less than 0. Currently if we set break time to 0 and change session value
-                    the alert keeps showing.
-                 */
-            if ((this.trueSessionTime === 3600 || this.trueBreakTime === 3600) && type === 'increase') {
+            if (((this.trueSessionTime === 3600 && elementClass === this.sessionClass) ||
+                (this.trueBreakTime === 3600 && elementClass === this.breakClass)) && type === 'increase') {
                 this.alert('Cannot add more time to the timer.');
-            } else if ((this.trueSessionTime === 0 || this.trueBreakTime === 0) && type === 'decrease') {
+
+            } else if (((this.trueSessionTime === 0 && elementClass === this.sessionClass) ||
+                (this.trueBreakTime === 0 && elementClass === this.breakClass)) && type === 'decrease') {
                 this.alert('Time value cannot be less than 0.');
             }
 
-            if (element.classList[0] === this.sessionClass) {
+            if (elementClass === this.sessionClass) {
                 this.updateValue(this._session, changeValue);
                 this.renderValues(this._session);
-            } else if (element.classList[0] === this.breakClass) {
+            } else if (elementClass === this.breakClass) {
                 this.updateValue(this._break, changeValue);
                 this.renderValues(this._break);
             } else {
@@ -280,7 +280,7 @@ class App {
             className = this._session;
 
             this.stop();
-            this.alert('Cannot start a timer for 0 minutes.');
+            this.alert('You cannot start a timer for 0 minutes.');
             console.log('ERROR: Cannot start a timer for 0 minutes.');
         }
         else if (this.initialBreakTime === 0) {
