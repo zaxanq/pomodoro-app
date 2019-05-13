@@ -1,0 +1,39 @@
+.input-container
+  position: absolute
+  width: 8.4rem
+  height: 4rem
+  display: flex
+  flex-direction: column
+  align-items: center
+  transition: opacity 0.15s ease-in-out
+
+  &.hidden
+    opacity: 0
+    pointer-events: none
+
+.value-input
+  +size(100%, 100%)
+  background-color: rgba($button-border-color, 0.16)
+  border: 0.1rem solid $button-border-color
+  font-size: $value-font-size
+  font-family: inherit
+  font-weight: inherit
+  text-align: center
+  color: inherit
+
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button
+    -webkit-appearance: none
+    margin: 0
+
+.value-submit
+  position: absolute
+  margin: 0
+  padding: 0
+  bottom: -2rem
+  width: 8.4rem
+  height: 2rem
+  text-align: center
+  background: transparent
+  color: inherit
+  border: 0

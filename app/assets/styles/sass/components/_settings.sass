@@ -1,6 +1,10 @@
-.settings-container,
-.settings__buttons
+.settings-container
   @extend %flex-center-center
+
+.settings__buttons
+  display: flex
+  justify-content: center
+  align-items: flex-start
 
 .settings__session,
 .settings__break
@@ -16,10 +20,9 @@
 
 .settings__value
   @extend %flex-center-center
-  padding: 0 2rem
   width: 8.6rem
   color: $button-text-color
-  font-size: 3.6rem
+  font-size: $value-font-size
 
 .settings__label
   text-align: center
@@ -28,3 +31,11 @@
 .label
   color: $color-secondary-400
   font-size: 2rem
+
+.session-value,
+.break-value
+  transition: opacity 0.15s ease-in-out
+
+  &.hidden
+    opacity: 0
+    pointer-events: none

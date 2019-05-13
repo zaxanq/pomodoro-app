@@ -1,6 +1,6 @@
 .button
   %flex-center-center
-  width: 84px
+  width: 8.4rem
   position: relative
   border: 0.1rem solid $button-border-color
   color: inherit
@@ -29,7 +29,7 @@
   &-value-change
     width: $button-value-change-width
     height: $button-value-change-height
-    margin: 0.2rem
+    margin: 0.1rem 0.2rem 0.2rem
     line-height: 1
 
   &:hover
@@ -47,7 +47,7 @@
       background-color: transparent
 
     &::before
-      $button-pseudo-out: 8px
+      $button-pseudo-out: 0.8rem
 
       content: ''
       width: calc(100% + #{$button-pseudo-out})
@@ -60,8 +60,7 @@
       transition: 0.2s ease-in-out
 
     &:hover::before
-      width: 100%
-      height: 100%
+      +size(100%, 100%)
       left: 0
       top: 0
       opacity: 0.16

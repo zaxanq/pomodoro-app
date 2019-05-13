@@ -7,13 +7,6 @@ class App {
         this.initTimer();
     }
 
-    /*
-       current buglist:
-
-        feature-add list:
-        *   session time number to change into input at click
-     */
-
     initControls() {
         this.buttonStart = document.getElementsByClassName('controls-start')[0];
         this.buttonPause = document.getElementsByClassName('controls-pause')[0];
@@ -58,6 +51,8 @@ class App {
 
         this.addButtonFunctions(this.session);
         this.addButtonFunctions(this.break);
+
+        this.addContainersClick();
     }
 
     initTimer() {
@@ -98,9 +93,11 @@ class App {
             if (elementClass === this.sessionClass) {
                 this.updateValue(this._session, changeValue);
                 this.renderValues(this._session);
+                this.getInputValue(this._session);
             } else if (elementClass === this.breakClass) {
                 this.updateValue(this._break, changeValue);
                 this.renderValues(this._break);
+                this.getInputValue(this._break);
             } else {
                 console.log('ERROR: No buttons found to add EventListener.')
             }
@@ -149,9 +146,9 @@ class App {
 
     setContainer(type, value) {
         if (type === this._session) {
-            this.sessionValueContainer.innerText =  value;
+            this.sessionValueContainer.innerText = value;
         } else if (type === this._break) {
-            this.breakValueContainer.innerText =  value;
+            this.breakValueContainer.innerText = value;
         }
     }
 
@@ -487,8 +484,109 @@ class App {
         actionContainer.classList.remove('paused');
     }
 
-    toInput() {
-        //TODO: add method changing value into input on click
+    addContainersClick() {
+        this.sessionContainerAsInput = false;
+        this.breakContainerAsInput = false;
+
+        this.sessionValueContainer.addEventListener('click', event => {
+            this.toInput(event.target);
+        });
+        this.breakValueContainer.addEventListener('click', event => {
+            this.toInput(event.target);
+        });
+
+        document.getElementsByClassName(`${this._session}-value-submit`)[0].addEventListener('click', event => {
+            this.toInput(event.target);
+        });
+        document.getElementsByClassName(`${this._break}-value-submit`)[0].addEventListener('click', event => {
+            this.toInput(event.target);
+        });
+
+        document.getElementsByClassName(`${this._session}-value-input`)[0].onkeypress = event => {
+            if (event.key === 'Enter') {
+                this.toInput(event.target);
+            }
+        };
+        document.getElementsByClassName(`${this._break}-value-input`)[0].onkeypress = event => {
+            if (event.key === 'Enter') {
+                this.toInput(event.target);
+            }
+        };
+    }
+
+    toggleInput(type, container, containerAsInput) {
+        let inputContainer = document.querySelector(`.settings__${type} .input-container`);
+
+        let input = document.querySelector(`.${type}-value-input`);
+        input.focus();
+        input.select();
+
+        if (containerAsInput) {
+            inputContainer.classList.remove('hidden');
+            container.classList.add('hidden');
+        } else {
+            inputContainer.classList.add('hidden');
+            container.classList.remove('hidden');
+        }
+    }
+
+    getInputValue(type) {
+        let input = document.querySelector(`.${type}-value-input`);
+
+        if (type === this._session) {
+            input.value = this.sessionValueContainer.innerText;
+        } else {
+            input.value = this.breakValueContainer.innerText;
+        }
+    }
+
+    setInputValue(type) {
+        let input = document.querySelector(`.${type}-value-input`);
+        let changeValue;
+
+        if (type === this._session) {
+            changeValue = parseInt(input.value) - this.sessionValueContainer.innerText;
+        } else {
+            changeValue = parseInt(input.value) - this.breakValueContainer.innerText;
+        }
+
+        if (changeValue > this.maximumTime) {
+            changeValue = this.maximumTime;
+        }
+        this.updateValue(type, changeValue);
+        this.renderValues(type);
+    }
+
+    toInput(container) {
+        let type = container.classList[0].split('-')[0];
+        console.log(type);
+
+        if (type === this._session) {
+            this.sessionContainerAsInput = !this.sessionContainerAsInput;
+
+            if (this.sessionContainerAsInput) {
+                this.getInputValue(type);
+                this.toggleInput(type, this.sessionValueContainer, this.sessionContainerAsInput);
+            } else {
+                this.setInputValue(type);
+                this.toggleInput(type, this.sessionValueContainer, this.sessionContainerAsInput);
+                this.alert(`${type.charAt(0).toUpperCase() + type.slice(1)} time set.`);
+            }
+
+        } else if (type === this._break) {
+            this.breakContainerAsInput = !this.breakContainerAsInput;
+
+            if (this.breakContainerAsInput) {
+                this.getInputValue(type);
+                this.toggleInput(type, this.breakValueContainer, this.breakContainerAsInput);
+
+            } else {
+                this.setInputValue(type);
+                this.toggleInput(type, this.breakValueContainer, this.breakContainerAsInput);
+                this.alert(`${type.charAt(0).toUpperCase() + type.slice(1)} time set.`);
+            }
+        }
+
     }
 }
 
