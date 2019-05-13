@@ -5,6 +5,8 @@ class App {
         this.initSettings();
         this.initControls();
         this.initTimer();
+
+        this.loadAlerts();
     }
 
     initControls() {
@@ -49,6 +51,9 @@ class App {
 
         this.renderValues('initial');
 
+        this.addLabel(this._session);
+        this.addLabel(this._break);
+
         this.addButtonFunctions(this.session);
         this.addButtonFunctions(this.break);
 
@@ -70,6 +75,19 @@ class App {
         }, 0);
     }
 
+    loadAlerts() {
+        this.message_maxTime = 'Cannot add more time to the timer.';
+        this.message_noZero = 'You cannot start a timer for 0 minutes.';
+        this.message_moreThanZero = 'Time value cannot be less than 0.';
+        this.message_notStarted = 'You cannot pause a timer that is not started.';
+        this.message_alreadyStopped = 'The timer is already in initial state.';
+        this.message_noBreakTime = 'Is there a point in using this timer with 0 break time? :)';
+    }
+
+    addLabel(type) {
+        document.querySelector(`.settings__${type} .label`).innerText = `${type.charAt(0).toUpperCase() + type.slice(1)} time`;
+    }
+
     addButtonFunctions(element) {
         this.addButtonClick(element, 'increase', 1);
         this.addButtonClick(element, 'increase', 10);
@@ -83,11 +101,11 @@ class App {
             .addEventListener('click', () => {
             if (((this.trueSessionTime === this.maximumTime && elementClass === this.sessionClass) ||
                 (this.trueBreakTime === this.maximumTime && elementClass === this.breakClass)) && type === 'increase') {
-                this.alert('Cannot add more time to the timer.');
+                this.alert(this.message_maxTime);
 
             } else if (((this.trueSessionTime === 0 && elementClass === this.sessionClass) ||
                 (this.trueBreakTime === 0 && elementClass === this.breakClass)) && type === 'decrease') {
-                this.alert('Time value cannot be less than 0.');
+                this.alert(this.message_moreThanZero);
             }
 
             if (elementClass === this.sessionClass) {
@@ -99,7 +117,7 @@ class App {
                 this.renderValues(this._break);
                 this.getInputValue(this._break);
             } else {
-                console.log('ERROR: No buttons found to add EventListener.')
+                this.error('No buttons found to add EventListener.')
             }
         });
     }
@@ -111,8 +129,8 @@ class App {
             if (elementClass === 'controls-start') {
                 if (this.state !== 1) {
                     if (this.trueTime === 0) {
-                        this.alert('You cannot start a timer for 0 minutes.');
-                        console.log('ERROR: Cannot start a timer for 0 minutes.');
+                        this.alert(this.message_noZero);
+                        this.error('Cannot start a timer for 0 minutes.');
                     } else {
                         this.showActionIcon('start');
                         this.start();
@@ -124,14 +142,14 @@ class App {
                     this.showActionIcon('pause');
                     this.pause();
                 } else if (this.state === 0) {
-                    this.alert('You cannot pause a timer that is not started.');
-                    console.log('ERROR: Cannot pause a timer that is not started.');
+                    this.alert(this.message_notStarted);
+                    this.error('Cannot pause a timer that is not started.');
                 }
 
             } else if (elementClass === 'controls-reset') {
                 if (this.state === 0) {
-                    this.alert('The timer is already in initial state.');
-                    console.log('ERROR: Cannot reset a timer that is not started.');
+                    this.alert(this.message_alreadyStopped);
+                    this.error('Cannot reset a timer that is not started.');
                 } else {
                     this.showActionIcon('reset');
                     this.stop();
@@ -139,7 +157,7 @@ class App {
             } else if ((elementClass === `controls-${this._session}`) || (elementClass === `controls-${this._break}`)) {
                 this.finished();
             } else {
-                console.log('ERROR: Unknown controls.');
+                this.error('Unknown controls.');
             }
         });
     }
@@ -198,7 +216,7 @@ class App {
             this.updateTimes(this._break);
 
         } else {
-            console.log('ERROR: Undefined value container.');
+            this.error('Undefined value container.');
         }
     }
 
@@ -289,8 +307,8 @@ class App {
             this.changeColors(this._session);
 
             this.stop();
-            this.alert('You cannot start a timer for 0 minutes.');
-            console.log('ERROR: Cannot start a timer for 0 minutes.');
+            this.alert(this.message_noZero);
+            this.error('Cannot start a timer for 0 minutes.');
         }
         else if (this.initialBreakTime === 0) {
             this.value = this.sessionValue;
@@ -299,7 +317,7 @@ class App {
             this.changeColors(this._session);
 
             this.stop();
-            this.alert('Is there a point in using this timer with 0 break time? :)');
+            this.alert(this.message_noBreakTime);
         } else {
             if (this.sessionIsActive) {
                 if (typeof this.value !== 'undefined') {
@@ -370,6 +388,10 @@ class App {
         }, 1500);
     }
 
+    error(message) {
+        console.log('ERROR:', message);
+    }
+
     disableButton(button) {
         if (button === 'start') {
             this.buttonStart.classList.add('disabled');
@@ -401,7 +423,7 @@ class App {
             this.buttonPause.innerText = 'Pause';
             this.buttonPause.classList.remove('active');
         } else {
-            console.log('ERROR: Unknown button.');
+            this.error('Unknown button.');
         }
     }
     updateValue(valueType, changeValue) {
