@@ -581,7 +581,6 @@ class App {
 
     toInput(container) {
         let type = container.classList[0].split('-')[0];
-        console.log(type);
 
         if (type === this._session) {
             this.sessionContainerAsInput = !this.sessionContainerAsInput;
