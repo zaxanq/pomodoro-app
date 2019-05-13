@@ -38,6 +38,14 @@
   .circle--right
     +size(100%, 100%)
     border: $circle-border solid rgba($color-secondary-400, 0.8)
+    transition: none
+    will-change: transform
+
+    &.animate
+      transition: 1s linear
+
+    &.reset
+      display: none
 
   .circle--left
     border-radius: $clock-size 0 0 $clock-size
@@ -49,6 +57,13 @@
     border-left: none
     transform-origin: left center
 
+.animations-toggle
+  width: unset
+  padding: 0.3rem 0.5rem
+  position: absolute
+  font-size: 1rem
+  left: 2rem
+  top: 2rem
 
 .current-time
   font-size: 5.6rem

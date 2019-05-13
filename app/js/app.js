@@ -6,7 +6,7 @@ class App {
         this.initControls();
         this.initTimer();
 
-        this.loadAlerts();
+        this.switch(true);
     }
 
     initControls() {
@@ -17,14 +17,14 @@ class App {
         this.startSession = document.getElementsByClassName('controls-session')[0];
         this.startBreak = document.getElementsByClassName('controls-break')[0];
 
-        this.switch(true);
-
         this.addOnClick(this.buttonStart);
         this.addOnClick(this.buttonPause);
         this.addOnClick(this.buttonReset);
 
         this.addOnClick(this.startSession);
         this.addOnClick(this.startBreak);
+
+        this.loadAlerts();
     }
 
     initSettings() {
@@ -42,6 +42,9 @@ class App {
             this.sessionValue = 25;
             this.breakValue = 5;
         }
+
+        this.updateTimes(this._break, true);
+        this.updateTimes(this._session, true);
 
         this.maximumTime = 240;
         this.maximumTime *= 60;
@@ -82,6 +85,8 @@ class App {
         setTimeout(() => {
             this.displayedTime.innerText = this.minutes + ':' + this.seconds;
         }, 0);
+
+        this.setToggleAnimations();
     }
 
     loadAlerts() {
@@ -118,11 +123,11 @@ class App {
             }
 
             if (elementClass === this.sessionClass) {
-                this.updateValue(this._session, changeValue);
+                this.updateValue(this._session, changeValue, true);
                 this.renderValues(this._session);
                 this.getInputValue(this._session);
             } else if (elementClass === this.breakClass) {
-                this.updateValue(this._break, changeValue);
+                this.updateValue(this._break, changeValue, true);
                 this.renderValues(this._break);
                 this.getInputValue(this._break);
             } else {
@@ -136,6 +141,9 @@ class App {
 
         element.addEventListener('click', () => {
             if (elementClass === 'controls-start') {
+                if (this.state === 0) {
+                    this.updateTimes(this._session, true);
+                }
                 if (this.state !== 1) {
                     if (this.trueTime === 0) {
                         this.alert(this.message_noZero);
@@ -161,10 +169,10 @@ class App {
                     this.error('Cannot reset a timer that is not started.');
                 } else {
                     this.showActionIcon('reset');
-                    this.stop();
+                    this.stop(true);
                 }
             } else if ((elementClass === `controls-${this._session}`) || (elementClass === `controls-${this._break}`)) {
-                this.finished();
+                this.finished(true);
             } else {
                 this.error('Unknown controls.');
             }
@@ -243,8 +251,8 @@ class App {
 
         this.timerInterval = setInterval(() => {
             this.trueTime--;
-            if (this.trueTime <= 0) {
-                this.finished();
+            if (this.trueTime < 0) {
+                this.finished(true);
             } else {
                 this.renderClock();
             }
@@ -259,7 +267,7 @@ class App {
         clearInterval(this.timerInterval);
     }
 
-    stop() {
+    stop(manual = false) {
         this.trueTime = this.value * 60;
         this.disableButton('reset');
         this.state = 0;
@@ -267,16 +275,17 @@ class App {
         this.hideActionPauseIcon();
 
         clearInterval(this.timerInterval);
-        this.renderClock();
+        this.renderClock(manual);
     }
 
-    finished() {
+    finished(manual = false) {
         this.state = 0;
 
         this.hideActionPauseIcon();
 
         clearInterval(this.timerInterval);
-        this.switch();
+        this.renderClock(manual);
+        this.switch(false, manual);
     }
 
     switchButtons(sessionIsActive) {
@@ -303,7 +312,7 @@ class App {
             .map(button => button.classList.remove(toRemove));
     }
 
-    switch(initial = false) {
+    switch(initial = false, manual = false) {
         let className;
         if (!initial &&
             ((this.initialSessionTime !== 0 && this.initialBreakTime !== 0) ||
@@ -319,7 +328,7 @@ class App {
 
             this.changeColors(this._session);
 
-            this.stop();
+            this.stop(manual);
             this.alert(this.message_noZero);
             this.error('Cannot start a timer for 0 minutes.');
         }
@@ -329,7 +338,7 @@ class App {
 
             this.changeColors(this._session);
 
-            this.stop();
+            this.stop(manual);
             this.alert(this.message_noBreakTime);
         } else {
             if (this.sessionIsActive) {
@@ -363,7 +372,7 @@ class App {
             .map(button => button.classList.add(className));
     }
 
-    renderClock() {
+    renderClock(manual = false) {
         this.minutes = Math.floor(this.trueTime / 60);
         this.seconds = this.trueTime % 60;
 
@@ -372,21 +381,29 @@ class App {
         }
 
         this.displayedTime.innerText = this.minutes + ':' + this.seconds;
-        this.renderCircle();
+        this.renderCircle(manual);
     }
 
-    renderCircle() {
-        let progress = this.initialTime === 0 ? 0 : (this.initialTime - this.trueTime) / this.initialTime * 360;
+    renderCircle(manual = false) {
+        if (manual) {
+            this.toggleAnimations('manual off');
+        }
 
-        if (progress % 360 === 0) {
-            this.circleLeft.setAttribute('style', `transform: rotate(0deg)`);
-            this.circleRight.setAttribute('style', `transform: rotate(0deg)`);
+        let progress = this.initialTime === 0 ? 360 : (this.initialTime - this.trueTime) / this.initialTime * 360;
+
+        if (progress === 360) {
+            this.circleLeft.setAttribute('style', `transform: rotate(-180deg)`);
+            this.circleRight.setAttribute('style', `transform: rotate(-180deg)`);
         } else if (progress <= 180) {
             this.circleLeft.setAttribute('style', `transform: rotate(-${progress}deg)`);
             this.circleRight.setAttribute('style', `transform: rotate(0deg)`);
         } else {
             this.circleLeft.setAttribute('style', `transform: rotate(-180deg)`);
             this.circleRight.setAttribute('style', `transform: rotate(-${progress % 180}deg)`);
+        }
+
+        if (manual) {
+            this.toggleAnimations('manual on');
         }
     }
 
@@ -439,11 +456,11 @@ class App {
             this.error('Unknown button.');
         }
     }
-    updateValue(valueType, changeValue) {
+    updateValue(valueType, changeValue, manual = false) {
         changeValue *= 60;
 
         if ((valueType === this._session && this.sessionIsActive) || (valueType === this._break && !this.sessionIsActive)) {
-            if (this.initialTime <= -changeValue) {
+            if (this.initialTime < -changeValue) {
                 this.trueTime = 0;
                 this.initialTime = 0;
 
@@ -495,7 +512,7 @@ class App {
         }
 
         if ((valueType === this._session && this.sessionIsActive) || (valueType === this._break && !this.sessionIsActive)) {
-            this.renderClock();
+            this.renderClock(manual);
         }
     }
 
@@ -619,6 +636,52 @@ class App {
                 this.toggleInput(type, this.breakValueContainer, this.breakContainerAsInput);
                 this.alert(`${type.charAt(0).toUpperCase() + type.slice(1)} time set.`);
             }
+        }
+    }
+
+    setToggleAnimations() {
+        this.toggleAnimationsButton = document.getElementsByClassName('animations-toggle')[0];
+
+        this.toggleAnimationsButton.addEventListener('click', () => {
+            this.toggleAnimations();
+        });
+
+        this.toggleAnimations(true);
+    }
+
+    toggleAnimations(mode = 'normal') {
+        if (mode === 'initial') {
+            this.circleLeft.classList.add('animate');
+            this.circleRight.classList.add('animate');
+            this.toggleAnimationsButton.innerText = 'Hide animations';
+
+            this.animatedClock = true;
+        } else if (mode === 'manual off') {
+            this.circleLeft.classList.add('reset');
+            setTimeout(() => {
+                this.circleLeft.classList.remove('reset');
+            }, 0);
+            this.circleRight.classList.add('reset');
+            setTimeout(() => {
+                this.circleRight.classList.remove('reset');
+            }, 0);
+            this.circleLeft.classList.remove('animate');
+            this.circleRight.classList.remove('animate');
+        } else if (mode === 'manual on') {
+            this.circleLeft.classList.add('animate');
+            this.circleRight.classList.add('animate');
+        } else {
+            if (this.animatedClock) {
+                this.circleLeft.classList.remove('animate');
+                this.circleRight.classList.remove('animate');
+                this.toggleAnimationsButton.innerText = 'Show animations';
+            } else {
+                this.circleLeft.classList.add('animate');
+                this.circleRight.classList.add('animate');
+                this.toggleAnimationsButton.innerText = 'Hide animations';
+            }
+
+            this.animatedClock  = !this.animatedClock;
         }
     }
 }
