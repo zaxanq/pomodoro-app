@@ -31,10 +31,19 @@ class App {
         this.state = 0;
         this.sessionIsActive = true;
 
-        this.sessionValue = 25; // [minutes]
-        this.breakValue = 5; // [minutes]
+        if (localStorage.length !== 0) {
+            if (localStorage.getItem('sessionTime')) {
+                this.sessionValue = localStorage.getItem('sessionTime') / 60;
+            }
+            if (localStorage.getItem('breakTime')) {
+                this.breakValue = localStorage.getItem('breakTime') / 60;
+            }
+        } else {
+            this.sessionValue = 25;
+            this.breakValue = 5;
+        }
 
-        this.maximumTime = 240; // [minutes]
+        this.maximumTime = 240;
         this.maximumTime *= 60;
 
         this._session = 'session';
@@ -179,6 +188,8 @@ class App {
                 this.trueTime = this.trueSessionTime;
                 this.initialTime = this.initialSessionTime;
             }
+
+            localStorage.setItem('sessionTime', this.initialSessionTime);
         } else if (type === this._break) {
             this.trueBreakTime = this.breakValue * 60;
             this.initialBreakTime = this.trueBreakTime;
@@ -187,6 +198,8 @@ class App {
                 this.trueTime = this.trueBreakTime;
                 this.initialTime = this.initialBreakTime;
             }
+
+            localStorage.setItem('breakTime', this.initialBreakTime);
         }
     }
 
@@ -607,7 +620,6 @@ class App {
                 this.alert(`${type.charAt(0).toUpperCase() + type.slice(1)} time set.`);
             }
         }
-
     }
 }
 
