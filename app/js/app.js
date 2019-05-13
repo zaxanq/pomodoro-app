@@ -1,7 +1,7 @@
 class App {
     init() {
         this.wrapper = document.getElementsByClassName('wrapper')[0];
-        this.timeDebugging = 10;
+        this.timeDebugging = 1000;
         this.initSettings();
         this.initControls();
         this.initTimer();
@@ -9,8 +9,6 @@ class App {
 
     /*
        current buglist:
-        *   setting break time to 0 during running timer will stop the timer with green layout but with logic
-            of session (red layout).
 
         feature-add list:
         *   session time number to change into input at click
@@ -264,22 +262,34 @@ class App {
         }
     }
 
+    changeColors(type) {
+        let toRemove;
+        if (type === this._session) {
+            toRemove = this._break;
+        } else {
+            toRemove = this._session;
+        }
+
+        this.switchButtons( type === this._session);
+        [...document.getElementsByClassName(toRemove)]
+            .map(button => button.classList.remove(toRemove));
+    }
+
     switch(initial = false) {
         let className;
         if (!initial &&
             ((this.initialSessionTime !== 0 && this.initialBreakTime !== 0) ||
-                (this.initialSessionTime === 0 && !this.sessionIsActive))) {
+                (this.initialSessionTime === 0 && !this.sessionIsActive) ||
+                (this.initialBreakTime === 0 && !this.sessionIsActive)
+            )) {
             this.sessionIsActive = !this.sessionIsActive;
-            console.log('session = !session');
         }
 
         if (this.initialSessionTime === 0) {
             this.value = this.sessionValue;
             className = this._session;
 
-            this.switchButtons( true);
-            [...document.getElementsByClassName(this._session)]
-                .map(button => button.classList.remove(this._session));
+            this.changeColors(this._session);
 
             this.stop();
             this.alert('You cannot start a timer for 0 minutes.');
@@ -288,6 +298,8 @@ class App {
         else if (this.initialBreakTime === 0) {
             this.value = this.sessionValue;
             className = this._session;
+
+            this.changeColors(this._session);
 
             this.stop();
             this.alert('Is there a point in using this timer with 0 break time? :)');
@@ -299,9 +311,7 @@ class App {
                 this.value = this.sessionValue;
                 className = this._session;
 
-                this.switchButtons(true);
-                [...document.getElementsByClassName(this._break)]
-                    .map(button => button.classList.remove(this._break));
+                this.changeColors(this._session);
             } else {
                 if (typeof this.value !== 'undefined') {
                     this.sessionValue = this.value;
@@ -309,9 +319,7 @@ class App {
                 this.value = this.breakValue;
                 className = this._break;
 
-                this.switchButtons(false);
-                [...document.getElementsByClassName(this._session)]
-                    .map(button => button.classList.remove(this._session));
+                this.changeColors(this._break);
             }
 
             if (!initial) {
