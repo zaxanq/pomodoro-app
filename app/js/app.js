@@ -150,6 +150,7 @@ class App {
                         this.error('Cannot start a timer for 0 minutes.');
                     } else {
                         this.showActionIcon('start');
+                        this.prestart();
                         this.start();
                     }
                 }
@@ -180,6 +181,9 @@ class App {
     }
 
     setContainer(type, value) {
+        if (value % 1 !== 0) {
+            value = value.toFixed(2);
+        }
         if (type === this._session) {
             this.sessionValueContainer.innerText = value;
         } else if (type === this._break) {
@@ -251,12 +255,17 @@ class App {
 
         this.timerInterval = setInterval(() => {
             this.trueTime--;
-            if (this.trueTime < 0) {
+            if (this.trueTime <= 0) {
                 this.finished(true);
             } else {
                 this.renderClock();
             }
         }, this.timeDebugging);
+    }
+
+    prestart() {
+        this.trueTime--;
+        this.renderClock();
     }
 
     pause() {
@@ -385,16 +394,34 @@ class App {
     }
 
     renderCircle(manual = false) {
+        let progress, step;
+
         if (manual) {
             this.toggleAnimations('manual off');
         }
 
-        let progress = this.initialTime === 0 ? 360 : (this.initialTime - this.trueTime) / this.initialTime * 360;
+        if (this.initialTime % 360 !== 0) {
+            step = this.initialTime - this.trueTime;
+            progress = step / (this.initialTime - 1) * 360;
+        } else {
+            progress = 0;
+        }
+
+        if (this.animatedClock) {
+            if (step === (this.initialTime / 2)) {
+                console.log('pauza');
+                this.circleLeft.classList.add('animate-middle-left');
+                this.circleRight.classList.add('animate-middle-right');
+            } else if (step === (this.initialTime / 2) + 1) {
+                this.circleLeft.classList.remove('animate-middle-left');
+                this.circleRight.classList.remove('animate-middle-right');
+            }
+        }
 
         if (progress === 360) {
             this.circleLeft.setAttribute('style', `transform: rotate(-180deg)`);
             this.circleRight.setAttribute('style', `transform: rotate(-180deg)`);
-        } else if (progress <= 180) {
+        } else if (progress < 180) {
             this.circleLeft.setAttribute('style', `transform: rotate(-${progress}deg)`);
             this.circleRight.setAttribute('style', `transform: rotate(0deg)`);
         } else {
@@ -456,7 +483,7 @@ class App {
         changeValue *= 60;
 
         if ((valueType === this._session && this.sessionIsActive) || (valueType === this._break && !this.sessionIsActive)) {
-            if (this.initialTime <= -changeValue) {
+            if (this.initialTime < -changeValue) {
                 this.trueTime = 0;
                 this.initialTime = 0;
 
