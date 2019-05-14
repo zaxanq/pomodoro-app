@@ -284,8 +284,8 @@ class App {
         this.hideActionPauseIcon();
 
         clearInterval(this.timerInterval);
-        this.renderClock(manual);
         this.switch(false, manual);
+        this.renderClock(manual);
     }
 
     switchButtons(sessionIsActive) {
@@ -401,10 +401,6 @@ class App {
             this.circleLeft.setAttribute('style', `transform: rotate(-180deg)`);
             this.circleRight.setAttribute('style', `transform: rotate(-${progress % 180}deg)`);
         }
-
-        if (manual) {
-            this.toggleAnimations('manual on');
-        }
     }
 
     alert(message) {
@@ -460,7 +456,7 @@ class App {
         changeValue *= 60;
 
         if ((valueType === this._session && this.sessionIsActive) || (valueType === this._break && !this.sessionIsActive)) {
-            if (this.initialTime < -changeValue) {
+            if (this.initialTime <= -changeValue) {
                 this.trueTime = 0;
                 this.initialTime = 0;
 
@@ -605,7 +601,7 @@ class App {
         if (changeValue > this.maximumTime) {
             changeValue = this.maximumTime;
         }
-        this.updateValue(type, changeValue);
+        this.updateValue(type, changeValue, true);
         this.renderValues(type);
     }
 
@@ -646,7 +642,7 @@ class App {
             this.toggleAnimations();
         });
 
-        this.toggleAnimations(true);
+        this.toggleAnimations('initial');
     }
 
     toggleAnimations(mode = 'normal') {
@@ -658,18 +654,11 @@ class App {
             this.animatedClock = true;
         } else if (mode === 'manual off') {
             this.circleLeft.classList.add('reset');
-            setTimeout(() => {
-                this.circleLeft.classList.remove('reset');
-            }, 0);
             this.circleRight.classList.add('reset');
             setTimeout(() => {
+                this.circleLeft.classList.remove('reset');
                 this.circleRight.classList.remove('reset');
-            }, 0);
-            this.circleLeft.classList.remove('animate');
-            this.circleRight.classList.remove('animate');
-        } else if (mode === 'manual on') {
-            this.circleLeft.classList.add('animate');
-            this.circleRight.classList.add('animate');
+            }, 10);
         } else {
             if (this.animatedClock) {
                 this.circleLeft.classList.remove('animate');
