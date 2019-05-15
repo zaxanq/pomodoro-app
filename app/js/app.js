@@ -32,12 +32,8 @@ class App {
         this.sessionIsActive = true;
 
         if (localStorage.length !== 0) {
-            if (localStorage.getItem('sessionTime')) {
-                this.sessionValue = localStorage.getItem('sessionTime') / 60;
-            }
-            if (localStorage.getItem('breakTime')) {
-                this.breakValue = localStorage.getItem('breakTime') / 60;
-            }
+            this.sessionValue = localStorage.getItem('sessionTime') / 60;
+            this.breakValue = localStorage.getItem('breakTime') / 60;
         } else {
             this.sessionValue = 25;
             this.breakValue = 5;
@@ -201,7 +197,9 @@ class App {
                 this.initialTime = this.initialSessionTime;
             }
 
-            localStorage.setItem('sessionTime', this.initialSessionTime);
+            if (this.initialSessionTime !== 0) {
+                localStorage.setItem('sessionTime', this.initialSessionTime);
+            }
         } else if (type === this._break) {
             this.trueBreakTime = this.breakValue * 60;
             this.initialBreakTime = this.trueBreakTime;
@@ -211,7 +209,9 @@ class App {
                 this.initialTime = this.initialBreakTime;
             }
 
-            localStorage.setItem('breakTime', this.initialBreakTime);
+            if (this.initialBreakTime !== 0) {
+                localStorage.setItem('breakTime', this.initialBreakTime);
+            }
         }
     }
 
@@ -382,8 +382,9 @@ class App {
     }
 
     renderClock(manual = false) {
-        this.minutes = Math.floor(this.trueTime / 60);
-        this.seconds = this.trueTime % 60;
+        this.minutes = this.trueTime < 0 ? 0 : Math.floor(this.trueTime / 60);
+        this.seconds = this.trueTime < 0 ? 0 : this.trueTime % 60;
+
 
         if (this.seconds < 10) {
             this.seconds = '0' + this.seconds;
