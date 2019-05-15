@@ -3,10 +3,12 @@
   +max-size(100vw, 100vw)
   border-radius: 50%
   position: relative
-  overflow: hidden
 
+@media (min-width: 720px)
+  .root
+    overflow: hidden
 
-@media (orientation: portrait)
+@media (orientation: portrait) and (max-width: 500px)
   .root
     +size(100%, 100%)
     +max-size(unset, unset)
