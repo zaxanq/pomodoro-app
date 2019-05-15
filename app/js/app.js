@@ -400,7 +400,7 @@ class App {
             this.toggleAnimations('manual off');
         }
 
-        if (this.initialTime % 360 !== 0) {
+        if (this.initialTime !== 0) {
             step = this.initialTime - this.trueTime;
             progress = step / (this.initialTime - 1) * 360;
         } else {
