@@ -409,7 +409,6 @@ class App {
 
         if (this.animatedClock) {
             if (step === (this.initialTime / 2)) {
-                console.log('pauza');
                 this.circleLeft.classList.add('animate-middle-left');
                 this.circleRight.classList.add('animate-middle-right');
             } else if (step === (this.initialTime / 2) + 1) {
