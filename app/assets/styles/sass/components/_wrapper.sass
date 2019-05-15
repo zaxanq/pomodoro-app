@@ -1,8 +1,8 @@
 .wrapper
-  display: flex
-  flex-direction: column
   +size($wrapper-width, $wrapper-height)
   +max-size(74vw, 74vw)
+  display: flex
+  flex-direction: column
   transition: 0.2s ease-in-out
   @extend %absolute-center
 
@@ -23,3 +23,10 @@
 
 .settings-container
   flex: 2
+
+
+@media (orientation: portrait)
+  .wrapper
+    +size(100%, 100%)
+    +max-size(unset, unset)
+

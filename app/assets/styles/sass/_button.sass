@@ -72,3 +72,11 @@
   &-hidden
     opacity: 0
     pointer-events: none
+
+
+@media (orientation: portrait) and (max-aspect-ratio: 19/32) and (max-width: 380px), (orientation: portrait) and (min-aspect-ratio: 21/33)
+  .button
+    &-value-change
+      width: 3.8rem
+      height: $button-value-change-height
+      margin: 0.1rem 0 0.2rem

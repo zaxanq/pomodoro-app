@@ -1,6 +1,13 @@
 .root
   +size($app-width, $app-height)
   +max-size(100vw, 100vw)
-  position: relative
   border-radius: 50%
+  position: relative
   overflow: hidden
+
+
+@media (orientation: portrait)
+  .root
+    +size(100%, 100%)
+    +max-size(unset, unset)
+    border-radius: 0
